@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+    <div class="line"></div>
+    <el-menu
+            :default-active="activeIndex2"
+            class="el-menu-demo"
+            mode="horizontal"
+            @select="handleSelect"
+            background-color="#545c64"
+            text-color="#fff"
+            active-text-color="#ffd04b">
+        <el-menu-item index="1">电影管理</el-menu-item>
+        <el-menu-item index="2">留言板</el-menu-item>
+        <el-menu-item index="3">用户管理</el-menu-item>
+        <el-menu-item index="4">新闻公告</el-menu-item>
+    </el-menu>
+    <div id="user_manage">
+        <el-table
+                :data="users"
+                style="width: 100%"
+                border
+                height="400">
+            <el-table-column
+                    fixed
+                    prop="username"
+                    label="用户名"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="account"
+                    label="账户"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="regist_date"
+                    label="注册时间">
+            </el-table-column>
+            <el-table-column
+                    prop="email"
+                    label="邮箱">
+            </el-table-column>
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button type="primary" >查看</el-button>
+                    <el-button type="primary">修改信息</el-button>
+                    <el-button type="danger" @click="delUser(scope.row)">删除用户</el-button>
+                    <el-button type="primary">管理权限</el-button>
+                </template>
+
+            </el-table-column>
+        </el-table>
+    </div>
+{% endblock %}
+
+{% block vue %}
+
+    <script>
+
+        new Vue({
+            el: '#app',
+            data: {
+                activeIndex2: '1',
+                users: []
+            },
+            methods: {
+                handleSelect: function (key, keyPath) {
+                    console.log(key, keyPath);
+                },
+                getAllUsers:function () {
+                this.$http.get('/users').then(function (data) {
+                    this.users = data.body;
+                }, function (response) {
+                    console.info(response);
+                })
+                },
+                delUser:function (row) {
+                    this.$http.get('/del_user',{params:{account:row.account}}).then(function (data) {
+
+
+                }, function (response) {
+                    console.info(response);
+                })
+                }
+            },
+
+            created: function () {
+                this.getAllUsers()
+            }
+        })
+    </script>
+{% endblock %}

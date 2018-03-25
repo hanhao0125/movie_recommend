@@ -1,0 +1,11 @@
+flask-sqlalchemy
+flask-script
+xlutils
+gunicorn
+flask
+pandas
+pymysql
+xlrd
+flask-wtf
+werkzeug
+flask-login

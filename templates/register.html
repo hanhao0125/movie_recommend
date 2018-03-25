@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+    <div style="text-align: center;margin-top: 100px">
+        <h1>注册</h1>
+        <el-form ref="form" :model="form" label-width="80px">
+            <el-form-item label="账户">
+                <el-input v-model="form.account" size="medium"></el-input>
+            </el-form-item>
+            <el-form-item label="密码">
+                <el-input v-model="form.password" size="medium" type="password"></el-input>
+            </el-form-item>
+            <p style="color: red">{{msg}}</p>
+            <el-form-item>
+                <el-button type="primary" @click="register">注册</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
+{% endblock %}
+{% block vue %}
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                form: {
+                    account: '',
+                    password: ''
+                },
+                msg: ''
+            },
+            methods: {
+                register: function () {
+                    this.$http.post('/register', {
+                        account: this.form.account,
+                        password: this.form.password
+
+                    }, {emulateJSON: true}).then(function (data) {
+                        this.msg = data.body;
+                        if(this.msg === 'success') {
+                            window.location.href='/login'
+                        }
+                    }, function (response) {
+                        console.info(response);
+                    })
+                }
+            }
+        })
+    </script>
+{% endblock %}
