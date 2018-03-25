@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2827ca32-42b7-475a-b67f-bfa19fd88105" name="Default" comment="" />
+    <list default="true" id="2827ca32-42b7-475a-b67f-bfa19fd88105" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -265,17 +267,6 @@
             <path>
               <item name="movie" type="b2602c69:ProjectViewProjectNode" />
               <item name="movie" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="movie" type="b2602c69:ProjectViewProjectNode" />
-              <item name="movie" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="movie" type="b2602c69:ProjectViewProjectNode" />
-              <item name="movie" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-              <item name="back-end" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
