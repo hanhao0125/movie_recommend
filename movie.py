@@ -229,6 +229,7 @@ def get_page_movie():
     res = []
     for m in movies:
         res.append({
+            'id': m.id,
             'name': m.name,
             'genre': m.genre,
             'actor': m.actor,
@@ -393,7 +394,8 @@ def movie_details(movie_id):
 @app.route('/movie_comments')
 def get_all_movie_comments():
     movie_id = request.args.get('movie_id')
-    comments = models.MovieEva.query.order_by(db.desc(models.MovieEva.eva_date)).filter(models.MovieEva.movie_id == movie_id).all()
+    comments = models.MovieEva.query.order_by(db.desc(models.MovieEva.eva_date)).filter(
+        models.MovieEva.movie_id == movie_id).all()
     res = [{
         'id': c.id,
         'eva_date': str(c.eva_date),

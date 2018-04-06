@@ -80,8 +80,8 @@
             comments:[]
         },
         methods: {
-            getMovieDetails: function (id) {
-                this.$http.get('/movie_details/' + id).then(function (data) {
+            getMovieDetails: function () {
+                this.$http.get('/movie_details/' + {{ movie.id }}).then(function (data) {
                     this.movie = data.body;
                 }, function (response) {
                 })
@@ -110,7 +110,7 @@
         },
 
         created: function () {
-            this.getMovieDetails(1);
+            this.getMovieDetails();
             this.getAllComments()
         }
     })

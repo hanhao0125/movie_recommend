@@ -22,16 +22,16 @@
                     <el-card class="box-card">
                         <div slot="header" style="font-size: large;font-weight: bold">
                         <span>{{m.name}}</span>
-                            <el-button  type="primary" size="small" style="float: right;">查看详情</el-button>
+                            <el-button  type="primary" size="small" @click="goToMovieDetails(m.id)" style="float: right;">查看详情</el-button>
                         <el-button  type="danger" size="small" style="float: right;margin-right: 3px">删除</el-button>
 
                         </div>
                     <div>
-                        <p>导演：{{m.director}}</p>
-                        <p>主演：{{m.actor}}</p>
-                        <p>类型：{{m.genre}}</p>
-                        <p>评分：{{m.score}}</p>
-                        <p>浏览次数：{{m.views}}</p>
+                        <p>导演：<span style="color: #93c1e0">{{m.director}}</span></p>
+                        <p>演员：<span style="color: #93c1e0">{{m.actor}}</span></p>
+                        <p>类型：<span>{{m.genre}}</span></p>
+                        <p>评分：<span><el-tag type="warning">{{m.score}}</el-tag></span></p>
+                        <p>浏览次数：<span><el-tag type="success">{{m.views}}</el-tag></span></p>
                     </div>
                     </el-card>
                 </div>
@@ -221,6 +221,9 @@
                 movies_from_category:[]
             },
             methods: {
+                goToMovieDetails:function (id) {
+                  window.location.href = '/movie_details_page/' + id
+                },
                 post2DB:function () {
                     this.$http.post('/add_movie_to_category', {
                         ids:JSON.stringify(this.add_movies.movies),

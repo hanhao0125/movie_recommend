@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2827ca32-42b7-475a-b67f-bfa19fd88105" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/movie.py" afterPath="$PROJECT_DIR$/movie.py" />
+      <change beforePath="$PROJECT_DIR$/templates/movieDetail.html" afterPath="$PROJECT_DIR$/templates/movieDetail.html" />
+      <change beforePath="$PROJECT_DIR$/templates/movieManage.html" afterPath="$PROJECT_DIR$/templates/movieManage.html" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -13,7 +15,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/apr_movie$movie.coverage" NAME="movie Coverage Results" MODIFIED="1522997567210" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/apr_movie$movie.coverage" NAME="movie Coverage Results" MODIFIED="1522998673873" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/movie$models.coverage" NAME="models Coverage Results" MODIFIED="1521892659349" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/movie$movie.coverage" NAME="movie Coverage Results" MODIFIED="1521962950044" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/movie$main.coverage" NAME="main Coverage Results" MODIFIED="1521888288172" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -59,14 +61,14 @@
       <file leaf-file-name="movie.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/movie.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="374" column="23" lean-forward="false" selection-start-line="374" selection-start-column="23" selection-end-line="374" selection-end-column="23" />
+            <state relative-caret-position="-3186">
+              <caret line="231" column="23" lean-forward="true" selection-start-line="231" selection-start-column="23" selection-end-line="231" selection-end-column="23" />
               <folding>
                 <element signature="e#0#70#0" expanded="true" />
                 <element signature="e#719#801#0" expanded="false" />
                 <element signature="e#1485#2055#0" expanded="false" />
-                <element signature="e#10664#11049#0" expanded="false" />
-                <element signature="e#11125#11759#0" expanded="false" />
+                <element signature="e#10688#11082#0" expanded="false" />
+                <element signature="e#11158#11792#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -85,8 +87,8 @@
       <file leaf-file-name="movieDetail.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/movieDetail.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="282">
-              <caret line="23" column="17" lean-forward="true" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="17" />
+            <state relative-caret-position="263">
+              <caret line="22" column="86" lean-forward="true" selection-start-line="18" selection-start-column="12" selection-end-line="22" selection-end-column="86" />
               <folding>
                 <element signature="n#style#0;n#span#0;n#p#0;n#el-col#0;n#el-row#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#span#0;n#p#1;n#el-col#0;n#el-row#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -98,9 +100,13 @@
       <file leaf-file-name="movieManage.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/templates/movieManage.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="160">
-              <caret line="21" column="46" lean-forward="true" selection-start-line="21" selection-start-column="46" selection-end-line="21" selection-end-column="46" />
-              <folding />
+            <state relative-caret-position="260">
+              <caret line="31" column="45" lean-forward="false" selection-start-line="31" selection-start-column="45" selection-end-line="31" selection-end-column="45" />
+              <folding>
+                <element signature="n#style#0;n#el-button#0;n#div#0;n#el-card#0;n#div#0;n#el-tab-pane#0;n#el-tabs#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#span#0;n#p#0;n#div#1;n#el-card#0;n#div#0;n#el-tab-pane#0;n#el-tabs#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#span#0;n#p#1;n#div#1;n#el-card#0;n#div#0;n#el-tab-pane#0;n#el-tabs#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -146,8 +152,10 @@
       <find>新闻</find>
       <find>current_user</find>
       <find>Revo</find>
-      <find>post</find>
       <find>update</find>
+      <find>查看</find>
+      <find>page</find>
+      <find>post</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -169,10 +177,10 @@
         <option value="$PROJECT_DIR$/config.py" />
         <option value="$PROJECT_DIR$/templates/base.html" />
         <option value="$PROJECT_DIR$/templates/main.html" />
-        <option value="$PROJECT_DIR$/templates/movieManage.html" />
         <option value="$PROJECT_DIR$/models.py" />
         <option value="$PROJECT_DIR$/movie.py" />
         <option value="$PROJECT_DIR$/templates/movieDetail.html" />
+        <option value="$PROJECT_DIR$/templates/movieManage.html" />
       </list>
     </option>
   </component>
@@ -341,7 +349,14 @@
       <option name="project" value="LOCAL" />
       <updated>1522997807541</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="done movie detail">
+      <created>1522997837324</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1522997837324</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -349,9 +364,9 @@
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3627586" sideWeight="0.50858366" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32965517" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32965517" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3627586" sideWeight="0.4914163" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3627586" sideWeight="0.4914163" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.37655172" sideWeight="0.4978678" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25608012" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -395,8 +410,8 @@
             <element signature="e#0#70#0" expanded="true" />
             <element signature="e#719#801#0" expanded="false" />
             <element signature="e#1485#2055#0" expanded="false" />
-            <element signature="e#10664#11049#0" expanded="false" />
-            <element signature="e#11125#11759#0" expanded="false" />
+            <element signature="e#10688#11082#0" expanded="false" />
+            <element signature="e#11158#11792#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -461,8 +476,8 @@
             <element signature="e#0#70#0" expanded="true" />
             <element signature="e#719#801#0" expanded="false" />
             <element signature="e#1485#2055#0" expanded="false" />
-            <element signature="e#10664#11049#0" expanded="false" />
-            <element signature="e#11125#11759#0" expanded="false" />
+            <element signature="e#10688#11082#0" expanded="false" />
+            <element signature="e#11158#11792#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -679,6 +694,31 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/movie.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3186">
+          <caret line="231" column="23" lean-forward="true" selection-start-line="231" selection-start-column="23" selection-end-line="231" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#70#0" expanded="true" />
+            <element signature="e#719#801#0" expanded="false" />
+            <element signature="e#1485#2055#0" expanded="false" />
+            <element signature="e#10688#11082#0" expanded="false" />
+            <element signature="e#11158#11792#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/movieDetail.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="263">
+          <caret line="22" column="86" lean-forward="true" selection-start-line="18" selection-start-column="12" selection-end-line="22" selection-end-column="86" />
+          <folding>
+            <element signature="n#style#0;n#span#0;n#p#0;n#el-col#0;n#el-row#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#p#1;n#el-col#0;n#el-row#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/templates/main.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="146">
@@ -687,36 +727,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/movie.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="374" column="23" lean-forward="false" selection-start-line="374" selection-start-column="23" selection-end-line="374" selection-end-column="23" />
-          <folding>
-            <element signature="e#0#70#0" expanded="true" />
-            <element signature="e#719#801#0" expanded="false" />
-            <element signature="e#1485#2055#0" expanded="false" />
-            <element signature="e#10664#11049#0" expanded="false" />
-            <element signature="e#11125#11759#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/movieDetail.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="282">
-          <caret line="23" column="17" lean-forward="true" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="17" />
-          <folding>
-            <element signature="n#style#0;n#span#0;n#p#0;n#el-col#0;n#el-row#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#span#0;n#p#1;n#el-col#0;n#el-row#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/movieManage.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="160">
-          <caret line="21" column="46" lean-forward="true" selection-start-line="21" selection-start-column="46" selection-end-line="21" selection-end-column="46" />
-          <folding />
+        <state relative-caret-position="260">
+          <caret line="31" column="45" lean-forward="false" selection-start-line="31" selection-start-column="45" selection-end-line="31" selection-end-column="45" />
+          <folding>
+            <element signature="n#style#0;n#el-button#0;n#div#0;n#el-card#0;n#div#0;n#el-tab-pane#0;n#el-tabs#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#p#0;n#div#1;n#el-card#0;n#div#0;n#el-tab-pane#0;n#el-tabs#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#p#1;n#div#1;n#el-card#0;n#div#0;n#el-tab-pane#0;n#el-tabs#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
