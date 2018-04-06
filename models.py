@@ -1,3 +1,5 @@
+import random
+
 from settings import db
 from datetime import datetime
 import xlrd
@@ -6,6 +8,7 @@ from werkzeug.security import check_password_hash
 from flask_login import UserMixin
 import json
 import uuid
+from sqlalchemy.sql import func
 
 
 class Movie(db.Model):
@@ -17,9 +20,11 @@ class Movie(db.Model):
     views = db.Column(db.Integer)
     country = db.Column(db.String(20))
     score = db.Column(db.Float)
+    add_date = db.Column(db.DateTime)
 
     def __init__(self, name):
         self.name = name
+        self.add_date = datetime.utcnow()
 
     def __repr__(self):
         return 'Movie name=%s' % self.name
@@ -64,7 +69,7 @@ class News(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref=db.backref('users', lazy='dynamic'))
 
-    def __init__(self, title,content, pub_date=None):
+    def __init__(self, title, content, pub_date=None):
         self.title = title
         self.content = content
         if pub_date is None:
@@ -84,6 +89,7 @@ class MovieEva(db.Model):
 
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'))
     movie = db.relationship('Movie', backref=db.backref('movies', lazy='dynamic'))
+    user = db.relationship('User', backref=db.backref('eva_user', lazy='dynamic'))
 
     def __init__(self, comment, eva_date=None):
         self.comment = comment
@@ -100,8 +106,9 @@ class MovieCategory(db.Model):
     category = db.Column(db.String(20))
     desc = db.Column(db.String(800))
 
-    def __init__(self, category, create_date=None):
+    def __init__(self, category, desc, create_date=None):
         self.category = category
+        self.desc = desc
         if create_date is None:
             self.create_date = datetime.utcnow()
 
@@ -124,6 +131,22 @@ class GuestBook(db.Model):
 
     def __repr__(self):
         return 'Guest_book content=%s' % self.content
+
+
+class MovieCatRe(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'))
+    movie_cat_id = db.Column(db.Integer, db.ForeignKey('movie_category.id'))
+
+    movie = db.relationship('Movie', backref='movie_cat_re')
+    movie_category = db.relationship('MovieCategory', backref='movie_cat_re')
+
+    def __init__(self, movie_id, movie_cat_id):
+        self.movie_id = movie_id
+        self.movie_cat_id = movie_cat_id
+
+    def __repr__(self):
+        return 'movie_cat_re id=%d' % self.id
 
 
 def import_user():
@@ -152,9 +175,38 @@ def import_movie():
     db.session.commit()
 
 
-if __name__ == '__main__':
-    db.drop_all()
-    db.create_all()
+def generate_movie_comments():
+    movies = Movie.query.all()
+    reviews = ['不好看', '非诚精彩', '满分', '期望过高']
+    user_ids = User.query.all()
+    user_ids = [u.id for u in user_ids]
+    for i in movies:
+        i.views = random.randint(1000,100000)
+        for j in range(30):
+            r = reviews[random.randint(0, 2)]
+            score = random.randint(3, 10)
+            user_id = user_ids[random.randint(1, 400)]
+            me = MovieEva(r)
+            me.user_id = user_id
+            me.score = score
+            me.movie_id = i.id
+            db.session.add(me)
     db.session.commit()
-    import_user()
-    import_movie()
+
+def update_movie_score():
+    movies = Movie.query.all()
+    for m in movies:
+
+        m.score = a[0]
+        print(m.score)
+    db.session.commit()
+
+
+if __name__ == '__main__':
+    # db.drop_all()
+    # db.create_all()
+    # db.session.commit()
+    # import_user()
+    # import_movie()
+    # generate_movie_comments()
+    update_movie_score()

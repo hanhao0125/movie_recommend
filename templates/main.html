@@ -66,7 +66,7 @@
 
     {# 新闻公告#}
     <div v-if="panel==='news'" style="margin-top: 30px;">
-        <el-collapse  accordion style="width: 800px;float: left;margin-left: 200px">
+        <el-collapse  accordion style="width: 500px;float: left;margin-left: 200px">
             <div v-for="n in news" style="font-size: larger;color: blue">
                 <el-collapse-item :title='n.title'>
                     <p style="color: cornflowerblue">发布时间：{{n.pub_date}} 发布人：{{n.username}}</p>
@@ -75,7 +75,7 @@
                 </el-collapse-item>
             </div>
         </el-collapse>
-    <div style="float: right;width: 400px;margin-right: 150px">
+    <div style="float: right;width: 400px;margin-right: 50px">
             <el-input v-model="pub_new.title" placeholder="请输入新闻标题"></el-input>
             <el-input
                     type="textarea"
@@ -90,33 +90,53 @@
 
     {#电影管理#}
     <div v-if="panel==='movieManage'" style="margin-top: 30px">
-    <div v-for="m in movies" style="width: 400px;height:400px;margin-left:10px;margin-top:15px;float: left">
-
-
+    <div>
+    {# 电影管理标签#}
+        <el-tabs v-model="activeName2" type="card" @tab-click="handleClick">
+            <el-tab-pane label="用户管理" name="first">用户管理</el-tab-pane>
+            <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
+            <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
+            <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
+  </el-tabs>
+    </div>
+    <div v-for="m in page_movies.movies" style="margin-left:200px;margin-top:15px;margin-right: 200px">
         <el-card class="box-card">
-            <div slot="header" style="font-size: x-large;color: darkslategrey">
+            <div slot="header" style="font-size: large;font-weight: bold">
             <span>{{m.name}}</span>
+                <el-button  type="primary" size="small" style="float: right;">查看详情</el-button>
+            <el-button  type="danger" size="small" style="float: right;margin-right: 3px">删除</el-button>
+
             </div>
-        <div style="background-color: ghostwhite">
+        <div>
             <p>导演：{{m.director}}</p>
             <p>主演：{{m.actor}}</p>
             <p>类型：{{m.genre}}</p>
             <p>评分：{{m.score}}</p>
             <p>浏览次数：{{m.views}}</p>
-            <el-button  type="primary">查看详情</el-button>
-            <el-button  type="danger">删除</el-button>
         </div>
         </el-card>
     </div>
+    <div style="margin-top: 20px;margin-left: 500px;font-size: larger;">
+
+    <el-pagination
+        background
+        :page-size="10"
+        layout="prev, pager, next"
+        @current-change="pageChange"
+        :current-page.sync="page_movies.curr_page"
+        :total=movies_count>
+    </el-pagination>
+    </div>
+
     </div>
     {#留言板功能#}
     <div v-if="panel==='guestBook'" style="margin-top: 30px;">
-    <div style="float: left;width: 600px;border: 1px;margin-left: 300px">
+    <div style="float: left;width: 600px;border: 1px;margin-left: 100px">
 
 
     <div v-for="m in guests" style="width: 600px;margin-top: 10px;">
         <span>
-            <el-card class="box-card" style="">
+            <el-card class="box-card" style="" shadow="hover">
                 <div slot="header">
                 <span style="color:red;font-size: small">{{m.username}}</span>
                     <el-button  style="float: right" type="danger" size="small" @click="delGuest(m.id)">删除</el-button>
@@ -129,7 +149,7 @@
         </span>
     </div>
     </div>
-    <div style="width: 400px;overflow: hidden;background: #ffffff;float: right;border: 1px;margin-top: 20px;margin-right: 300px">
+    <div style="width: 400px;overflow: hidden;background: #ffffff;float: right;border: 1px;margin-top: 20px;margin-right: 50px">
             <el-input
                     type="textarea"
                     :rows="5"
@@ -170,7 +190,12 @@
                     email:'',
                     password:'',
                     phone:''
-                }
+                },
+                page_movies:{
+                    movies:[],
+                    curr_page:1
+                },
+                movies_count:0
             },
             methods: {
 
@@ -252,7 +277,7 @@
 
                     else if (key === 'movieManage') {
                         if (this.movies.length === 0) {
-                            this.getAllMovies();
+                            this.getPageMovies();
                         }
                         this.panel = 'movieManage'
 
@@ -292,6 +317,26 @@
                     })
 
                 },
+                getPageMovies: function () {
+                    this.$http.get('/page_movies',{params:{curr_page:this.page_movies.curr_page}}).then(function (data) {
+                        this.page_movies.movies = data.body;
+                    }, function (response) {
+                        console.info(response);
+                    })
+
+                },
+                pageChange:function () {
+                    this.getPageMovies()
+                },
+                getMoviesCount: function () {
+                    this.$http.get('/movies_count').then(function (data) {
+                        this.movies_count = data.body;
+                    }, function (response) {
+                        console.info(response);
+                    })
+
+                },
+
                 getAllNews: function () {
                     this.$http.get('/news').then(function (data) {
                         this.news = data.body;
@@ -342,6 +387,8 @@
             },
 
             created: function () {
+                this.getPageMovies();
+                this.getMoviesCount()
 
             }
         })
