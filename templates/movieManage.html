@@ -1,0 +1,373 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+        <!-- import Vue.js -->
+        <!-- 引入样式 -->
+        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+        <!-- 引入组件库 -->
+
+        <title>电影管理</title>
+
+</head>
+<body>
+    {#电影管理#}
+    <div id="app" style="margin-left: 200px;margin-right: 200px;margin-bottom: 50px">
+        <el-tabs v-model="activeName" type="border-card" @tab-click="handleClick">
+            <el-tab-pane label="电影" name="movie">
+                <el-button type="success"
+                           @click="new_movie.state=true"
+                           style=" float:right;margin-bottom: 5px;margin-right: 50px">
+                    新增电影</el-button>
+                  <div v-for="m in page_movies.movies" style="margin-left:200px;margin-top:15px;margin-right: 200px">
+                    <el-card class="box-card">
+                        <div slot="header" style="font-size: large;font-weight: bold">
+                        <span>{{m.name}}</span>
+                            <el-button  type="primary" size="small" @click="goToMovieDetails(m.id)" style="float: right;">查看详情</el-button>
+                        <el-button  type="danger" size="small" style="float: right;margin-right: 3px">删除</el-button>
+
+                        </div>
+                    <div>
+                        <p>导演：<span style="color: #93c1e0">{{m.director}}</span></p>
+                        <p>演员：<span style="color: #93c1e0">{{m.actor}}</span></p>
+                        <p>类型：<span>{{m.genre}}</span></p>
+                        <p>评分：<span><el-tag type="warning">{{m.score}}</el-tag></span></p>
+                        <p>浏览次数：<span><el-tag type="success">{{m.views}}</el-tag></span></p>
+                    </div>
+                    </el-card>
+                </div>
+                <div style="margin-top: 20px;margin-left: 500px;font-size: larger;">
+
+                <el-pagination
+                    background
+                    :page-size="10"
+                    layout="prev, pager, next"
+                    @current-change="pageChange"
+                    :current-page.sync="page_movies.curr_page"
+                    :total=movies_count>
+                </el-pagination>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="分类" name="category">
+                <div style="float: left;width: 500px;border: 1px;margin-left: 10px">
+                    <div v-for="(m,i) in movie_category" style="width: 500px;margin-top: 10px;">
+                        <span>
+                            <el-card class="box-card" style="" shadow="hover">
+                                <div slot="header">
+                                <span style="color:blue;font-size: larger">{{m.category}}</span>
+                                <el-button  style="float: right" type="primary" size="small" @click="manageCategory(i)">管理</el-button>
+                                </div>
+                            <div>
+                                <el-button type="text">创建于：{{m.create_date}}</el-button>
+                                <p style="color: darkgrey">{{m.desc}}</p>
+
+                            </div>
+                            </el-card>
+                        </span>
+                    </div>
+                    </div>
+                    <div style="width: 400px;overflow: hidden;background: #ffffff;float: right;border: 1px;margin-top: 20px;margin-right: 50px">
+                            <el-input v-model="new_category.category" placeholder="类别名称" style="margin-bottom: 5px"></el-input>
+
+                            <el-input
+                                    type="textarea"
+                                    :rows="3"
+                                    placeholder="描述"
+                                    v-model="new_category.desc">
+                            </el-input>
+                            <el-button type="primary" size="small" @click="createCategory" style="margin-top: 10px;">创建类别</el-button>
+                    </div>
+            </el-tab-pane>
+            <el-tab-pane label="管理类别" name="manage">
+                <h1>{{manage_category.category}}</h1>
+                <el-button type="text" >创建于：{{manage_category.create_date}}</el-button>
+                <h3>共{{movies_from_category.length}}部电影 </h3>
+                <p style="color: darkgrey">{{manage_category.desc}}</p>
+                <el-button type="danger" @click="delCategory(manage_category.id)"
+                           style="margin-bottom: 5px;margin-left: 5px;">删除该类别</el-button>
+                <el-button type="primary"
+                           @click="addMovie2Cat"
+                           style="float: left">
+                    为类别新增电影</el-button>
+                <div style="margin-top: 10px">
+
+                <p></p>
+                </div>
+                <el-table
+                :data="movies_from_category"
+                style="width: 100%"
+                border
+                height="400">
+                <el-table-column
+                        fixed
+                        prop="name"
+                        label="电影名称"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="genre"
+                        label="类型"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="director"
+                        label="导演"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="actor"
+                        label="演员"
+                        width="280">
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <el-button type="danger"  size="small" @click="delMovieFromCat(scope.row.re_id)">从该类别中删除</el-button>
+                    </template>
+
+                </el-table-column>
+            </el-table>
+            </el-tab-pane>
+         </el-tabs>
+        <div>
+            <el-dialog title="新增电影" :visible.sync="new_movie.state">
+            电影名:<el-input v-model="new_movie.name" placeholder=""></el-input>
+            导演：<el-input v-model="new_movie.director" style="margin-top: 5px"></el-input>
+            演员：<el-input v-model="new_movie.actor" style="margin-top: 5px" placeholder="以空格隔开多个演员"></el-input>
+            类型：<el-input v-model="new_movie.genre" style="margin-top: 5px" placeholder="以空格隔开多个类型"></el-input>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="new_movie.state = false">取 消</el-button>
+                <el-button type="primary" @click="addNewMovie">确 定</el-button>
+            </div>
+            </el-dialog>
+        </div>
+        <div>
+            <el-dialog title="添加电影" :visible.sync="add_movies.state" width="60%">
+             <el-table
+                :data="movies_not_from_category"
+                style="width: 100%"
+                border
+                height="400">
+                <el-table-column
+                        fixed
+                        prop="name"
+                        label="电影名称"
+                        width="200">
+                </el-table-column>
+                <el-table-column
+                        prop="director"
+                        label="导演"
+                        width="200">
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <el-button type="primary"  size="small" @click="add2Category(scope)">添加至该类别</el-button>
+                    </template>
+
+                </el-table-column>
+            </el-table>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="add_movies.state = false">取 消</el-button>
+                <el-button type="primary" @click="post2DB">确 定</el-button>
+            </div>
+            </el-dialog>
+        </div>
+    </div>
+
+</body>
+<script type="text/javascript" src="https://unpkg.com/vue/dist/vue.js"></script>
+<script type="text/javascript" src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+<script>
+
+        new Vue({
+            el: '#app',
+            data: {
+                activeName:'movie',
+                movie_category:[],
+                new_category:{
+                    category:'',
+                    desc:''
+                },
+                new_movie:{
+                  category:1,
+                  name:'',
+                  director:'',
+                  actor:'',
+                  genre:'',
+                  state:false
+                },
+                add_movies:{
+                    state:false,
+                    movies:[]
+                },
+                movies_not_from_category:[],
+                manage_category:{},
+                movies: [],
+                leave_msg:'',
+                news_detail:false,
+                update_user:{
+                    id:'',
+                    state:false,
+                    username:'',
+                    email:'',
+                    password:'',
+                    phone:''
+                },
+                page_movies:{
+                    movies:[],
+                    curr_page:1
+                },
+                movies_count:0,
+                movies_from_category:[]
+            },
+            methods: {
+                goToMovieDetails:function (id) {
+                  window.location.href = '/movie_details_page/' + id
+                },
+                post2DB:function () {
+                    this.$http.post('/add_movie_to_category', {
+                        ids:JSON.stringify(this.add_movies.movies),
+                        category_id:this.manage_category.id
+                    }, {emulateJSON: true}).then(function (data) {
+                        if (data.body === 'success') {
+                            this.add_movies.state = false;
+                            this.getMoviesOnCat(this.manage_category.id);
+                            this.add_movies = []
+                        }
+                    }, function (response) {
+                    })
+                },
+                addMovie2Cat:function () {
+                    this.add_movies.state = true;
+                    this.getMoviesNotFromCat()
+                },
+                add2Category:function (scope) {
+                  this.add_movies.movies.push(scope.row.id);
+                  this.movies_not_from_category.splice(scope.$index,1);
+                },
+                getMoviesNotFromCat:function () {
+                    this.$http.get('/movies_not_from_category',{params:{id:this.manage_category.id}}).then(function (data) {
+                        this.movies_not_from_category = data.body;
+                    }, function (response) {
+
+                    })
+                },
+                addNewMovie:function () {
+                    this.$http.post('/add_movie', {
+                        name: this.new_movie.name,
+                        director:this.new_movie.director,
+                        actor:this.new_movie.actor,
+                        genre:this.new_movie.genre
+                    }, {emulateJSON: true}).then(function (data) {
+                        if (data.body === 'success') {
+                            this.new_movie.state = false;
+                            this.activeName = 'movie'
+                        }
+                    }, function (response) {
+                    })
+                },
+                delMovieFromCat:function (id) {
+                     this.$http.post('/del_movie_from_category', {
+                        id:id
+                    }, {emulateJSON: true}).then(function (data) {
+                        if (data.body === 'success') {
+                            this.getMoviesOnCat(this.manage_category.id);
+                        }
+                    }, function (response) {
+                    })
+                },
+                handleClick:function (tab, event) {
+                  this.activeName = tab.name;
+                  if(this.activeName === 'category'){
+                      if(this.movie_category.length === 0) {
+                          this.getAllCategory()
+                      }
+                  }
+                  else if (tab.name === 'movie') {
+                      if (this.page_movies.movies.length === 0) {
+                          this.getPageMovies()
+                      }
+                  }
+                },
+                manageCategory:function (index) {
+                  this.manage_category = this.movie_category[index];
+                  this.getMoviesOnCat(this.manage_category.id);
+                  this.activeName = 'manage'
+                },
+                getMoviesOnCat:function (id) {
+                    this.$http.get('/movies_from_category',{params:{id:id}}).then(function (data) {
+                        this.movies_from_category = data.body;
+                    }, function (response) {
+                        console.info(response);
+                    })
+                },
+                getAllCategory:function () {
+                    this.$http.get('/movie_category').then(function (data) {
+                        this.movie_category = data.body;
+                    }, function (response) {
+                        console.info(response);
+                    })
+                },
+                delCategory:function (id) {
+                    this.$http.get('/del_category', {
+                        params:{id:id}
+                    }).then(function (data) {
+                        this.msg = data.body;
+                        if (this.msg === 'success') {
+                            this.getAllNews();
+
+                        }
+                    }, function (response) {
+                        console.info(response);
+                    })
+                },
+                createCategory:function () {
+                    this.$http.post('/create_category', {
+                        category: this.new_category.category,
+                        desc: this.new_category.desc
+                    }, {emulateJSON: true}).then(function (data) {
+                        this.new_category.category = '';
+                        this.new_category.desc='';
+                        this.getAllCategory()
+                    }, function (response) {
+                        console.info(response);
+                    })
+                },
+                getAllMovies: function () {
+                    this.$http.get('/movies').then(function (data) {
+                        this.movies = data.body;
+                    }, function (response) {
+                        console.info(response);
+                    })
+
+                },
+                getPageMovies: function () {
+                    this.$http.get('/page_movies',{params:{curr_page:this.page_movies.curr_page}}).then(function (data) {
+                        this.page_movies.movies = data.body;
+                    }, function (response) {
+                        console.info(response);
+                    })
+
+                },
+                pageChange:function () {
+                    this.getPageMovies()
+                },
+                getMoviesCount: function () {
+                    this.$http.get('/movies_count').then(function (data) {
+                        this.movies_count = data.body;
+                    }, function (response) {
+                    })
+
+                }
+
+            },
+
+            created: function () {
+                this.getPageMovies();
+                this.getMoviesCount()
+
+            }
+        })
+    </script>
+</html>
+
+

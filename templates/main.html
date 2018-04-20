@@ -1,143 +1,180 @@
 {% extends "base.html" %}
-{% block title %}Index{% endblock %}
+{% block title %}首页{% endblock %}
 {% block head %}
     {{ super() }}
 {% endblock %}
 {% block content %}
 
     {#用户管理#}
-    <div v-if="panel==='userManage'" style="margin-top: 30px;">
-        <el-table
-                :data="users"
-                style="width: 100%"
-                border
-                height="400">
-            <el-table-column
-                    fixed
-                    prop="username"
-                    label="用户名"
-                    width="180">
-            </el-table-column>
-            <el-table-column
-                    prop="account"
-                    label="账户"
-                    width="180">
-            </el-table-column>
-            <el-table-column
-                    prop="register_date"
-                    label="注册时间"
-                    width="180">
-            </el-table-column>
-            <el-table-column
-                    prop="email"
-                    label="邮箱"
-                    width="180">
-            </el-table-column>
-            <el-table-column label="权限" width="220">
-                <template slot-scope="scope">
-                    <el-tag type="success" v-if="scope.row.is_admin===true">管理员</el-tag>
-                    <div v-if="scope.row.is_admin===false">
-                        <el-tag type="info" >普通会员</el-tag>
-                        <el-button type="success" size="small" @click="giveAdmin(scope.row.id)">赋予管理员</el-button>
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column label="操作">
-                <template slot-scope="scope">
-                    <el-button type="primary" size="small">查看</el-button>
-                    <el-button type="primary" size="small" @click="updateUser(scope.row)">修改信息</el-button>
-                    <el-button type="danger"  size="small" @click="delUser(scope.row)">删除用户</el-button>
-                </template>
-
-            </el-table-column>
-        </el-table>
-
-        <el-dialog title="更新信息" :visible.sync="update_user.state">
-            用户名:<el-input v-model="update_user.username" placeholder=""></el-input>
-            邮箱：<el-input v-model="update_user.email" style="margin-top: 5px"></el-input>
-            密码：<el-input v-model="update_user.password" style="margin-top: 5px"></el-input>
-            手机：<el-input v-model="update_user.phone" style="margin-top: 5px"></el-input>
-         <div slot="footer" class="dialog-footer">
-              <el-button @click="update_user.state = false">取 消</el-button>
-               <el-button type="primary" @click="updateUserInfo">确 定</el-button>
-         </div>
-        </el-dialog>
-    </div>
-
+{#    <div v-if="panel==='userManage'" style="margin-top: 30px;">#}
+{##}
+{#        <el-table#}
+{#                :data="users"#}
+{#                style="width: 100%"#}
+{#                border#}
+{#                height="400">#}
+{#            <el-table-column#}
+{#                    fixed#}
+{#                    prop="username"#}
+{#                    label="用户名"#}
+{#                    width="180">#}
+{#            </el-table-column>#}
+{#            <el-table-column#}
+{#                    prop="account"#}
+{#                    label="账户"#}
+{#                    width="180">#}
+{#            </el-table-column>#}
+{#            <el-table-column#}
+{#                    prop="register_date"#}
+{#                    label="注册时间"#}
+{#                    width="180">#}
+{#            </el-table-column>#}
+{#            <el-table-column#}
+{#                    prop="email"#}
+{#                    label="邮箱"#}
+{#                    width="180">#}
+{#            </el-table-column>#}
+{#            <el-table-column label="权限" width="220">#}
+{#                <template slot-scope="scope">#}
+{#                    <el-tag type="success" v-if="scope.row.admin===true">管理员</el-tag>#}
+{#                    <div v-if="scope.row.admin===false">#}
+{#                        <el-tag type="info" >普通会员</el-tag>#}
+{#                        <el-button type="success" size="small" @click="giveAdmin(scope.row.id)">赋予管理员</el-button>#}
+{#                    </div>#}
+{#                </template>#}
+{#            </el-table-column>#}
+{#            <el-table-column label="操作">#}
+{#                <template slot-scope="scope">#}
+{#                    <el-button type="primary" size="small">查看</el-button>#}
+{#                    <el-button type="primary" size="small" @click="updateUser(scope.row)">修改信息</el-button>#}
+{#                    <el-button type="danger"  size="small" @click="delUser(scope.row)">删除用户</el-button>#}
+{#                </template>#}
+{##}
+{#            </el-table-column>#}
+{#        </el-table>#}
+{##}
+{#        <el-dialog title="更新信息" :visible.sync="update_user.state">#}
+{#            用户名:<el-input v-model="update_user.username" placeholder=""></el-input>#}
+{#            邮箱：<el-input v-model="update_user.email" style="margin-top: 5px"></el-input>#}
+{#            密码：<el-input v-model="update_user.password" style="margin-top: 5px"></el-input>#}
+{#            手机：<el-input v-model="update_user.phone" style="margin-top: 5px"></el-input>#}
+{#         <div slot="footer" class="dialog-footer">#}
+{#              <el-button @click="update_user.state = false">取 消</el-button>#}
+{#               <el-button type="primary" @click="updateUserInfo">确 定</el-button>#}
+{#         </div>#}
+{#        </el-dialog>#}
+{#    </div>#}
+{##}
     {# 新闻公告#}
-    <div v-if="panel==='news'" style="margin-top: 30px;">
-        <el-collapse  accordion style="width: 800px;float: left;margin-left: 200px">
-            <div v-for="n in news" style="font-size: larger;color: blue">
-                <el-collapse-item :title='n.title'>
-                    <p style="color: cornflowerblue">发布时间：{{n.pub_date}} 发布人：{{n.username}}</p>
-                    <p style="color: darkgrey;font-size: larger">{{n.content}}</p>
-                    <el-button type="danger" @click="delNews(n.id)" size="small">删除新闻</el-button>
-                </el-collapse-item>
-            </div>
-        </el-collapse>
-    <div style="float: right;width: 400px;margin-right: 150px">
-            <el-input v-model="pub_new.title" placeholder="请输入新闻标题"></el-input>
-            <el-input
-                    type="textarea"
-                    :rows="3"
-                    placeholder="请输入新闻内容"
-                    v-model="pub_new.content"
-                    style="margin-top: 5px">
-            </el-input>
-            <el-button type="primary" size="small" @click="pubNews" style="margin-top: 5px">发布新闻</el-button>
-    </div>
-    </div>
-
+{#    <div v-if="panel==='news'" style="margin-top: 30px;">#}
+{#        <el-collapse  accordion style="width: 500px;float: left;margin-left: 200px">#}
+{#            <div v-for="n in news" style="font-size: larger;color: blue">#}
+{#                <el-collapse-item :title='n.title'>#}
+{#                    <p style="color: cornflowerblue">发布时间：{{n.pub_date}} 发布人：{{n.username}}</p>#}
+{#                    <p style="color: darkgrey;font-size: larger">{{n.content}}</p>#}
+{#                    {% if current_user.is_admin %}#}
+{#                    <el-button type="danger" @click="delNews(n.id)" size="small">删除新闻</el-button>#}
+{#                    {% endif %}#}
+{#                </el-collapse-item>#}
+{#            </div>#}
+{#        </el-collapse>#}
+{#    <div style="float: right;width: 400px;margin-right: 50px">#}
+{#        {% if current_user.is_admin %}#}
+{#            <el-input v-model="pub_new.title" placeholder="请输入新闻标题"></el-input>#}
+{#            <el-input#}
+{#                    type="textarea"#}
+{#                    :rows="3"#}
+{#                    placeholder="请输入新闻内容"#}
+{#                    v-model="pub_new.content"#}
+{#                    style="margin-top: 5px">#}
+{#            </el-input>#}
+{#            <el-button type="primary" size="small" @click="pubNews" style="margin-top: 5px">发布新闻</el-button>#}
+{#        {% endif %}#}
+{#    </div>#}
+{#    </div>#}
+{##}
     {#电影管理#}
-    <div v-if="panel==='movieManage'" style="margin-top: 30px">
-    <div v-for="m in movies" style="width: 400px;height:400px;margin-left:10px;margin-top:15px;float: left">
+{#    <div v-if="panel==='movieIndex'" style="margin-top: 30px">#}
+{#    <div>#}
+{#        <el-row >#}
+{#            <el-col :span="8" :offset="5">#}
+{#                <el-select v-model="sort_key" placeholder="排序" @change="sortMovieByKey">#}
+{#                    <el-option#}
+{#                      v-for="item in options"#}
+{#                      :key="item.value"#}
+{#                      :label="item.label"#}
+{#                      :value="item.value">#}
+{#                    </el-option>#}
+{#                </el-select>#}
+{#            </el-col>#}
+{#            <el-col :span="8">#}
+{#                 <el-input placeholder="请输入内容" v-model="search_words">#}
+{#                 <el-button slot="append" icon="el-icon-search" @click="searchMovies"></el-button>#}
+{#                 </el-input>#}
+{#            </el-col>#}
+{#        </el-row>#}
+{#    </div>#}
+{#    <el-row v-for="m in page_movies.movies">#}
+{#    <el-col  :span="10" :offset="5" style="margin-top: 10px">#}
+{#        <el-card class="box-card">#}
+{#            <div slot="header" style="font-size: large;font-weight: bold">#}
+{#            <span>{{m.name}}</span>#}
+{#                <el-button  type="primary" size="small" style="float: right;" @click="goToMovieDetails(m.id)">查看详情</el-button>#}
+{#            {% if current_user.is_authenticated %}#}
+{#                <el-button  type="success" size="small" style="float: right;margin-right: 3px" @click="collect_id=m.id;mark_visible=true">收藏</el-button>#}
+{#            {% endif %}#}
+{#            {% if current_user.is_admin %}#}
+{#                <el-button  type="danger" size="small" style="float: right;margin-right: 3px">删除</el-button>#}
+{#            {% endif %}#}
+{#            </div>#}
+{#        <div>#}
+{#            <p>导演：{{m.director}}</p>#}
+{#            <p>主演：{{m.actor}}</p>#}
+{#            <p>类型：{{m.genre}}</p>#}
+{#            <p>评分：<el-tag type="warning">{{m.score}}</el-tag></p>#}
+{#            <p>浏览次数：<el-tag type="success">{{m.views}}</el-tag></p>#}
+{#        </div>#}
+{#        </el-card>#}
+{#    </el-col>#}
+{#    </el-row>#}
+{##}
+{##}
+{#    <el-dialog#}
+{#      title="收藏电影"#}
+{#      :visible.sync="mark_visible"#}
+{#      width="30%"#}
+{#      >#}
+{#      <span>#}
+{#          <el-input v-model="collect_mark"  type="textarea" :rows="2" placeholder="说点什么..."></el-input>#}
+{##}
+{#      </span>#}
+{#      <span slot="footer" class="dialog-footer">#}
+{#        <el-button @click="mark_visible = false">取 消</el-button>#}
+{#        <el-button type="primary" @click="submitCollection">确 定</el-button>#}
+{#      </span>#}
+{#    </el-dialog>#}
+{##}
+{#    <div style="margin-top: 20px;margin-left: 500px;font-size: larger;">#}
+{##}
+{#    <el-pagination#}
+{#        background#}
+{#        :page-size="10"#}
+{#        layout="prev, pager, next"#}
+{#        @current-change="pageChange"#}
+{#        :current-page.sync="page_movies.curr_page"#}
+{#        :total=movies_count>#}
+{#    </el-pagination>#}
+{#    </div>#}
+{##}
+{#    </div>#}
 
 
-        <el-card class="box-card">
-            <div slot="header" style="font-size: x-large;color: darkslategrey">
-            <span>{{m.name}}</span>
-            </div>
-        <div style="background-color: ghostwhite">
-            <p>导演：{{m.director}}</p>
-            <p>主演：{{m.actor}}</p>
-            <p>类型：{{m.genre}}</p>
-            <p>评分：{{m.score}}</p>
-            <p>浏览次数：{{m.views}}</p>
-            <el-button  type="primary">查看详情</el-button>
-            <el-button  type="danger">删除</el-button>
-        </div>
-        </el-card>
-    </div>
-    </div>
     {#留言板功能#}
+    {% block guest %}
+
+    {% endblock %}
     <div v-if="panel==='guestBook'" style="margin-top: 30px;">
-    <div style="float: left;width: 600px;border: 1px;margin-left: 300px">
 
-
-    <div v-for="m in guests" style="width: 600px;margin-top: 10px;">
-        <span>
-            <el-card class="box-card" style="">
-                <div slot="header">
-                <span style="color:red;font-size: small">{{m.username}}</span>
-                    <el-button  style="float: right" type="danger" size="small" @click="delGuest(m.id)">删除</el-button>
-                    <el-button style="float: right;" type="text">发布于：{{m.pub_date}}</el-button>
-                </div>
-            <div>
-                <p>{{m.content}}</p>
-            </div>
-            </el-card>
-        </span>
-    </div>
-    </div>
-    <div style="width: 400px;overflow: hidden;background: #ffffff;float: right;border: 1px;margin-top: 20px;margin-right: 300px">
-            <el-input
-                    type="textarea"
-                    :rows="5"
-                    placeholder="请输入留言内容"
-                    v-model="leave_msg">
-            </el-input>
-            <el-button type="primary" size="small" @click="pubMessage" style="margin-top: 10px;">发送留言</el-button>
-    </div>
     </div>
 
 
@@ -145,13 +182,14 @@
 
 {% block vue %}
 
+
     <script>
 
-        new Vue({
+      var app =  new Vue({
             el: '#app',
             data: {
-                activeIndex: 'movieManage',
-                panel: 'movieManage',
+                activeIndex: 'movieIndex',
+                panel: 'movieIndex',
                 users: [],
                 news: [],
                 movies: [],
@@ -170,10 +208,60 @@
                     email:'',
                     password:'',
                     phone:''
-                }
+                },
+                page_movies:{
+                    movies:[],
+                    curr_page:1
+                },
+                movies_count:0,
+                options: [{
+                  value: 'score',
+                  label: '评分'
+                }, {
+                  value: 'views',
+                  label: '浏览量'
+                }, {
+                  value: 'add_date',
+                  label: '创建时间'
+                }, {
+                  value: 'name',
+                  label: '电影名称'
+                }],
+                sort_key: '',
+                search_words:'',
+                collect_mark:'',
+                mark_visible:false,
+                collect_id:0
+
             },
             methods: {
+                submitCollection:function() {
+                    this.$http.post('/collect_movie', {
+                        movie_id: this.collect_id,
+                        mark: this.collect_mark
+                    }, {emulateJSON: true}).then(function (data) {
+                        if (data.body=== 'success') {
+                            this.mark_visible = false;
+                            this.$message({
+                              message: '收藏成功！',
+                              type: 'success'
+                            });
 
+                        }
+                    }, function (response) {
+                        console.info(response);
+                    })
+                },
+                searchMovies:function(){
+                  this.getPageMovies()
+                },
+                sortMovieByKey:function(key){
+                    this.page_movies.curr_page = 1;
+                    this.getPageMovies()
+                },
+                goToMovieDetails:function (id) {
+                  window.location.href = '/movie_details_page/' + id
+                },
                 delNews:function (id) {
                     this.$http.get('/del_news', {
                         params:{id:id}
@@ -249,16 +337,28 @@
                         }
                         this.panel = 'userManage'
                     }
-
-                    else if (key === 'movieManage') {
-                        if (this.movies.length === 0) {
-                            this.getAllMovies();
-                        }
-                        this.panel = 'movieManage'
+                    else if (key === "infoStatistics") {
+                            this.panel = 'infoStatistics';
+                            window.location.href = '/st_page'
 
                     }
 
+                    else if (key === 'movieManage') {
+                        window.location.href='/movie_manage'
+
+                    } else if (key === 'questionnaire') {
+                        window.location.href = '/questionnaire'
+                    }
+
+                    else if (key === 'movieIndex') {
+                         if (this.page_movies.movies.length === 0) {
+                            this.getPageMovies();
+                        }
+                        this.panel = 'movieIndex'
+                    }
+
                     else if (key === 'guestBook') {
+                        window.location.href='/guest';
                         if (this.guests.length === 0) {
                             this.getAllGuests();
                         }
@@ -277,11 +377,15 @@
                         window.location.href='/logout'
                     }
                 },
+                getInfoStatistics:function() {
+                   this.$http.get('/statistics').then(function (data) {
+                        this.info_st = data.body;
+                    })
+                },
                 getAllUsers: function () {
                     this.$http.get('/users').then(function (data) {
                         this.users = data.body;
                     }, function (response) {
-                        console.info(response);
                     })
                 },
                 getAllMovies: function () {
@@ -292,6 +396,28 @@
                     })
 
                 },
+                getPageMovies: function () {
+
+                    this.$http.get('/page_movies',{params:
+                            {curr_page:this.page_movies.curr_page,
+                             sort_key:this.sort_key,
+                             search_words:this.search_words}}).then(function (data) {
+                        this.page_movies.movies = data.body;
+                    })
+
+                },
+                pageChange:function () {
+                    this.getPageMovies()
+                },
+                getMoviesCount: function () {
+                    this.$http.get('/movies_count').then(function (data) {
+                        this.movies_count = data.body;
+                    }, function (response) {
+                        console.info(response);
+                    })
+
+                },
+
                 getAllNews: function () {
                     this.$http.get('/news').then(function (data) {
                         this.news = data.body;
@@ -329,11 +455,9 @@
                         content: this.leave_msg
                     }, {emulateJSON: true}).then(function (data) {
                         this.msg = data.body;
-                        if (this.msg === 'success') {
-                            this.leave_msg = '';
-                            this.getAllGuests();
+                        this.getAllGuests();
 
-                        }
+
                     }, function (response) {
                         console.info(response);
                     })
@@ -342,8 +466,13 @@
             },
 
             created: function () {
+                this.getPageMovies();
+                this.getMoviesCount()
 
             }
         })
+
     </script>
+    {% block vue_g %}
+    {% endblock %}
 {% endblock %}

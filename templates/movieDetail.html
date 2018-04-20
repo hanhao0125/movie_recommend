@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+    <!-- import Vue.js -->
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+
+    <title>movie</title>
+
+</head>
+<body>
+<div id="app" style="margin-left: 200px;margin-right: 200px;margin-bottom: 50px">
+    <el-row>
+        <el-col :span="12">
+            <h1>{{ movie.name }}</h1>
+
+            <p>导演：<span style="color: #93c1e0">{{ movie.director }}</span></p>
+            <p>演员：<span style="color: #93c1e0">{{ movie.actor }}</span></p>
+            <p>类型：<span>{{ movie.genre }}</span></p>
+            <p>评分：<span><el-tag type="warning">{{ movie.score }}</el-tag></span></p>
+            <p>浏览次数：<span><el-tag type="success">{{ movie.views }}</el-tag></span></p>
+        </el-col>
+        <el-col :span="8">
+            <div style="margin-top: 100px">
+
+                <el-rate
+                    v-model="new_comment.score"
+                    :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                    :max=10
+                    style="margin-bottom: 5px">
+                </el-rate>
+                <el-input
+                    type="textarea"
+                    :rows="3"
+                    placeholder="请输入短评"
+                    v-model="new_comment.comment">
+                </el-input>
+                {%  if current_user.is_authenticated %}
+                <el-button type="primary" size="small" @click="pubComment" style="margin-top: 5px">发布短评</el-button>
+                {% else %}
+                <el-button type="primary" size="small" @click="pubComment" style="margin-top: 5px" disabled>发布短评</el-button>
+                {% endif %}
+
+            </div>
+        </el-col>
+    </el-row>
+    <video :src="movie.video_path" controls="controls">
+        您的浏览器不支持 video 标签。
+    </video>
+    <h2>《{{ movie.name }}》的短评</h2>
+    <el-row v-for="c in comments" style="margin-top: 10px;width: 70%">
+        <el-card class="box-card">
+        <div slot="header" class="clearfix">
+            <span style="color: #3985b5">{{c.username}}</span>
+            <p style="font-size: small;color: darkgray;float: right;">{{c.eva_date}}</p>
+
+            <el-rate
+                    v-model="c.score"
+                    :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                    :max=10
+                    disabled
+                    show-score
+                    style="float: right; padding: 3px 0;margin-right: 60px">
+            </el-rate>
+        </div>
+            <p>{{c.comment}}</p>
+    </el-card>
+    </el-row>
+</div>
+
+
+
+</body>
+<script type="text/javascript" src="https://unpkg.com/vue/dist/vue.js"></script>
+<script type="text/javascript" src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+<script>
+
+    new Vue({
+        el: '#app',
+        data: {
+            movie:{},
+            new_comment:{
+                comment:'',
+                score:1
+            },
+            comments:[]
+        },
+        methods: {
+            getMovieDetails: function () {
+                this.$http.get('/movie_details/' + {{ movie.id }}).then(function (data) {
+                    this.movie = data.body;
+                }, function (response) {
+                })
+            },
+            pubComment:function () {
+                this.$http.post('/pub_comment', {
+                        comment: this.new_comment.comment,
+                        score:this.new_comment.score,
+                        movie_id:this.movie.id
+                    }, {emulateJSON: true}).then(function (data) {
+                        if (data.body === 'success') {
+                            this.getAllComments();
+                            this.new_comment.comment = '';
+                            this.new_comment.score = 1
+                        }
+                    }, function (response) {
+                    })
+            },
+            getAllComments:function () {
+                this.$http.get('/movie_comments',{params:{movie_id:{{ movie.id }} }}).then(function (data) {
+                    this.comments = data.body;
+                }, function (response) {
+                })
+            }
+
+        },
+
+        created: function () {
+            this.getMovieDetails();
+            this.getAllComments()
+        }
+    })
+</script>
+</html>
+
+

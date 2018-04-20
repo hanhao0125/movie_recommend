@@ -13,20 +13,29 @@
 <body>
 <div id="app">
 
-    <div id="content" style="margin-left: 100px;margin-right: 100px">
+    <div id="content" style="margin-left: 100px;margin-right: 100px;margin-bottom: 50px">
         <el-menu
                 :default-active="activeIndex"
                 class="el-menu-demo"
                 mode="horizontal"
                 @select="handleSelect"
-                background-color="#545c64"
+                background-color="#155B88"
                 text-color="#fff"
-                active-text-color="#ffd04b">
-            <el-menu-item index="movieManage">电影管理</el-menu-item>
+                active-text-color="#FF7E00">
+            <el-menu-item index="movieIndex">电影主页</el-menu-item>
             <el-menu-item index="guestBook">留言板</el-menu-item>
-            <el-menu-item index="userManage">用户管理</el-menu-item>
+            <el-menu-item index="questionnaire">问卷调查</el-menu-item>
+
             <el-menu-item index="news">新闻公告</el-menu-item>
+            {% if current_user.is_admin %}
+            <el-menu-item index="userManage">用户管理</el-menu-item>
+            <el-menu-item index="movieManage">电影管理</el-menu-item>
+            <el-menu-item index="infoStatistics">信息统计</el-menu-item>
+            {% endif %}
+            {% if current_user.is_authenticated %}
             <el-menu-item index="logout" style="float: right">注销</el-button>
+            {% endif %}
+
             </el-menu-item>
         </el-menu>
         {% block content %}{% endblock %}

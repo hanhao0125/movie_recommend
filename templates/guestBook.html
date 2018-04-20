@@ -1,0 +1,115 @@
+{% extends "main.html" %}
+{% block guest %}
+<div style="float: left;width: 600px;border: 1px;margin-left: 100px" id="guestBook">
+
+
+    <div v-for="m in guests" style="width: 600px;margin-top: 10px;" >
+        <span>
+            <el-card class="box-card" style="" shadow="hover">
+                <div slot="header">
+                <span style="color:red;font-size: small">{{m.username}}</span>
+                    {% if current_user.is_admin %}
+                    <el-button  style="float: right" type="danger" size="small" @click="delGuest(m.id)">删除</el-button>
+                    {% endif %}
+                    <el-button style="float: right;" type="text">发布于：{{m.pub_date}}</el-button>
+                </div>
+            <div>
+                <p>{{m.content}}</p>
+            </div>
+            </el-card>
+        </span>
+    </div>
+    </div>
+    <div style="width: 400px;overflow: hidden;background: #ffffff;float: right;border: 1px;margin-top: 20px;margin-right: 50px">
+            <el-input
+                    type="textarea"
+                    :rows="5"
+                    placeholder="请输入留言内容"
+                    v-model="leave_msg">
+            </el-input>
+        {%  if current_user.is_authenticated %}
+            <el-button type="primary" size="small" @click="pubMessage" style="margin-top: 10px;">发送留言</el-button>
+        {% else %}
+            <el-button type="primary" size="small" @click="pubMessage" style="margin-top: 10px;" disabled>发送留言</el-button>
+
+        {% endif %}
+    </div>
+{% endblock %}
+{% block vue_g %}
+    <script>
+    app.activeIndex='guestBook';
+    app.panel = 'panel';
+    new Vue({
+            el: '#guestBook',
+            data: {
+                activeIndex: 'guestBook',
+                panel: 'guestBook',
+                users: [],
+                news: [],
+                movies: [],
+                guests: [],
+                pub_new: {
+                    state: false,
+                    title: '',
+                    content: ''
+                },
+                leave_msg:'',
+                news_detail:false,
+                update_user:{
+                    id:'',
+                    state:false,
+                    username:'',
+                    email:'',
+                    password:'',
+                    phone:''
+                },
+                page_movies:{
+                    movies:[],
+                    curr_page:1
+                },
+                movies_count:0,
+                options: [{
+                  value: 'score',
+                  label: '评分'
+                }, {
+                  value: 'views',
+                  label: '浏览量'
+                }, {
+                  value: 'add_date',
+                  label: '创建时间'
+                }, {
+                  value: 'name',
+                  label: '电影名称'
+                }]
+
+            },
+            methods: {
+                getAllGuests: function () {
+                    this.$http.get('/guests').then(function (data) {
+                        this.guests = data.body;
+                    })
+                },
+                pubMessage:function () {
+                    if (this.leave_msg === '') {
+
+                    } else {
+                        this.$http.post('/leave_message', {
+                        content: this.leave_msg
+                    }, {emulateJSON: true}).then(function (data) {
+                        this.msg = data.body;
+                        this.getAllGuests();
+
+
+                    }, function (response) {
+                        console.info(response);
+                    })
+                    }
+                }
+            },
+
+            created: function () {
+                this.getAllGuests();
+            }
+        });
+    </script>
+{% endblock %}

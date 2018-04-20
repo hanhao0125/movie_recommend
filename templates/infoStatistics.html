@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <title>信息统计</title>
+</head>
+<body>
+<div id="app">
+    <el-row>
+        <el-col :offset="20">
+            <a href="/">主页</a>
+        </el-col>
+    </el-row>
+    <hr>
+    <el-row :gutter="20">
+        <el-col :span="5" :offset="8">
+            会员人数：{{st.user_count}}
+        </el-col>
+        <el-col :span="5">
+            收录电影：{{st.movie_count}}
+        </el-col>
+    </el-row>
+    <el-row :gutter="20">
+        <el-col :span="5" :offset="8">
+            评论总数：{{st.eva_count}}
+        </el-col>
+        <el-col :span="5">
+            留言总数：{{st.guest_count}}
+        </el-col>
+    </el-row>
+    <el-row>
+        <el-col :span="15" :offset="10">
+            <h1>调查问卷统计信息</h1>
+        </el-col>
+    </el-row>
+    <el-row>
+        <el-col :offset="15">
+            <p style="color: red">网站平均得分：{{st.score}}</p>
+        </el-col>
+    </el-row>
+
+    <el-row style="margin-left: 100px">
+        <el-col :offset="1">
+            <h4>得知网站来源:</h4>
+        </el-col>
+        <el-col v-for="f in st.from_where" :span="4" :offset="1">
+            {{f[0]}}:{{f[1]}}
+        </el-col>
+
+    </el-row >
+    <el-row style="margin-left: 100px">
+         <el-col :offset="1">
+            <h4>电影喜爱类型:</h4>
+        </el-col>
+        <el-col v-for="f in st.favorite_genre" :span="4" :offset="1">
+            {{f[0]}}:{{f[1]}}
+        </el-col>
+
+    </el-row>
+    <el-row style="margin-left: 100px">
+        <el-col :offset="1">
+            <h4>详细信息:</h4>
+        </el-col>
+    </el-row>
+        <el-table
+      :data="qa"
+      style="width: 80%;margin-left: 200px">
+      <el-table-column
+        prop="sex"
+        label="性别"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="from_where"
+        label="来源"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="score"
+        label="网站满意度(满分5分)"
+        width="180">
+      </el-table-column>
+        <el-table-column
+        prop="favorite_genre"
+        label="喜爱电影类型"
+        width="180">
+      </el-table-column>
+            <el-table-column
+        prop="submit_date"
+        label="提交时间"
+            width="180">
+      </el-table-column>
+    </el-table>
+
+</div>
+</body>
+<script type="text/javascript" src="https://unpkg.com/vue/dist/vue.js"></script>
+<script type="text/javascript" src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+<script>
+
+    new Vue({
+        el: '#app',
+        data: {
+            st:{},
+            qa:[]
+        },
+        methods: {
+            getStatistics:function() {
+                this.$http.get('/statistics', {
+                }).then(function (data) {
+                    this.st = data.body
+                    }
+                )
+            },
+            getAllQa: function () {
+                this.$http.get('/qa', {
+                }).then(function (data) {
+                    this.qa = data.body
+                    }
+                )
+            }
+        },
+
+        created: function () {
+            this.getStatistics();
+            this.getAllQa();
+        }
+    })
+</script>
+
+</html>
