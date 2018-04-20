@@ -73,104 +73,7 @@
     <select />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="movie.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/movie.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="316">
-              <caret line="543" column="14" selection-start-line="543" selection-start-column="14" selection-end-line="543" selection-end-column="14" />
-              <folding>
-                <element signature="e#0#80#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="console_2.sql" pinned="false" current-in-tab="false">
-        <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/c0d35531-6fe2-498b-8cc2-e76a2272e7b6/console_2.sql">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="47" selection-start-column="47" selection-end-column="47" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="814">
-              <caret line="153" lean-forward="true" selection-start-line="153" selection-end-line="153" />
-              <folding>
-                <element signature="e#1933#2519#0" />
-                <element signature="e#2552#3334#0" />
-                <element signature="e#3372#3828#0" />
-                <element signature="e#3862#4383#0" />
-                <element signature="e#4984#5566#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="main.html" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/templates/main.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="322">
-              <caret line="187" column="9" selection-start-line="187" selection-start-column="9" selection-end-line="187" selection-end-column="9" />
-              <folding>
-                <element signature="e#9208#9296#0#HTML" />
-                <element signature="e#9336#9780#0#HTML" />
-                <element signature="e#9822#10268#0#HTML" />
-                <element signature="e#10313#10660#0#HTML" />
-                <element signature="e#10705#11427#0#HTML" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="guestBook.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/guestBook.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="316">
-              <caret line="39" column="7" selection-start-line="39" selection-start-column="7" selection-end-line="39" selection-end-column="7" />
-              <folding>
-                <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#0;n#div#0;n#!!top" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="base.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/base.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="376">
-              <caret line="51" column="15" lean-forward="true" selection-start-line="51" selection-start-column="15" selection-end-line="51" selection-end-column="15" />
-              <folding>
-                <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="myCollection.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/myCollection.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret selection-end-column="25" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="movieManage.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/movieManage.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="334" column="22" lean-forward="true" selection-start-line="334" selection-start-column="22" selection-end-line="334" selection-end-column="22" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -247,8 +150,8 @@
         <option value="$PROJECT_DIR$/templates/myCollection.html" />
         <option value="$PROJECT_DIR$/templates/back-end/guestBook.html" />
         <option value="$PROJECT_DIR$/movie.py" />
-        <option value="$PROJECT_DIR$/templates/guestBook.html" />
         <option value="$PROJECT_DIR$/templates/main.html" />
+        <option value="$PROJECT_DIR$/templates/guestBook.html" />
       </list>
     </option>
   </component>
@@ -493,8 +396,8 @@
       <window_info anchor="bottom" id="Database Changes" order="12" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Python Console" order="9" weight="0.32890365" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49413645" visible="true" weight="0.32890365" />
-      <window_info anchor="bottom" id="Terminal" order="10" sideWeight="0.4978678" weight="0.3765227" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49413645" weight="0.32890365" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" sideWeight="0.4978678" visible="true" weight="0.3765227" />
       <window_info anchor="bottom" id="Database Console" order="13" weight="0.32890365" />
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25746268" />
       <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
@@ -638,7 +541,7 @@
           <settings layout="Hierarchic Group" zoom="0.7494646680942184" x="457.0" y="220.0" />
           <SelectedNodes />
           <Categories>
-            <Category />
+            <Category>Key columns</Category>
             <Category>Columns</Category>
           </Categories>
           <SCOPE>All</SCOPE>
@@ -828,6 +731,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/templates/main.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="476" column="18" lean-forward="true" selection-start-line="476" selection-start-column="18" selection-end-line="476" selection-end-column="18" />
+          <folding>
+            <element signature="e#9208#9296#0#HTML" />
+            <element signature="e#9336#9780#0#HTML" />
+            <element signature="e#9822#10268#0#HTML" />
+            <element signature="e#10313#10660#0#HTML" />
+            <element signature="e#10705#11427#0#HTML" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="814">
@@ -844,25 +761,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/guestBook.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="316">
-          <caret line="39" column="7" selection-start-line="39" selection-start-column="7" selection-end-line="39" selection-end-column="7" />
+        <state relative-caret-position="100">
+          <caret line="5" column="69" lean-forward="true" selection-start-line="5" selection-start-column="69" selection-end-line="5" selection-end-column="69" />
           <folding>
             <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#0;n#div#0;n#!!top" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/main.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="322">
-          <caret line="187" column="9" selection-start-line="187" selection-start-column="9" selection-end-line="187" selection-end-column="9" />
-          <folding>
-            <element signature="e#9208#9296#0#HTML" />
-            <element signature="e#9336#9780#0#HTML" />
-            <element signature="e#9822#10268#0#HTML" />
-            <element signature="e#10313#10660#0#HTML" />
-            <element signature="e#10705#11427#0#HTML" />
           </folding>
         </state>
       </provider>
