@@ -1,4 +1,4 @@
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@119.29.94.179/mv'
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@ip/mv'
 SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
 
