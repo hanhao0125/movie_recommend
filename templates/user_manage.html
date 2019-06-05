@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}首页{% endblock %}
+{% block title %}用户管理{% endblock %}
 {% block head %}
     {{ super() }}
 {% endblock %}
@@ -8,11 +8,9 @@
 <div id="userManage">
     <el-table
             :data="users"
-            style="width: 100%"
-            border
+            style="width: 100%;margin: 20px 80px 10px 80px;background-color: rgb(238, 238, 238);"
             height="600">
         <el-table-column
-                fixed
                 prop="username"
                 label="用户名"
                 width="180"
@@ -53,15 +51,26 @@
 
             </template>
         </el-table-column>
-        <el-table-column label="操作" align="center">
+        <el-table-column label="操作" align="center" width="200">
             <template slot-scope="scope">
-                <el-button type="primary" size="small" @click="updateUser(scope.row)">修改信息</el-button>
-                <el-button type="danger"  size="small" @click=" freezeUser(scope.row)">冻结用户</el-button>
+                <div v-if="scope.row.is_admin===true">
+                <el-button type="primary" size="small" @click="updateUser(scope.row)" disabled>修改信息</el-button>
+                <el-button type="danger"  size="small" @click=" freezeUser(scope.row)" disabled>冻结用户</el-button>
+                </div>
+                <div v-else>
+                    <el-button type="primary" size="small" @click="updateUser(scope.row)">修改信息</el-button>
+                    <el-button type="danger"  size="small" @click=" freezeUser(scope.row)">冻结用户</el-button>
+                </div>
+
             </template>
 
         </el-table-column>
     </el-table>
-
+    <el-row type="flex" justify="center">
+         <el-button @click="getPageUsers" type="success" style="display: block;width: 30%;margin-top: 10px">
+            加载更多
+        </el-button>
+    </el-row>
     <el-dialog title="更新信息" :visible.sync="update_user.state">
         用户名:<el-input v-model="update_user.username" placeholder=""></el-input>
         邮箱：<el-input v-model="update_user.email" style="margin-top: 5px"></el-input>
@@ -72,7 +81,9 @@
            <el-button type="primary" @click="updateUserInfo">确 定</el-button>
      </div>
     </el-dialog>
+    <div style="margin-bottom: 40px">
 
+    </div>
 </div>
 {% endblock %}
 {% block vue %}
@@ -82,6 +93,7 @@
             el: '#userManage',
             data: {
             users: [],
+            curr_page:0,
             update_user:{
                 id:'',
                 state:false,
@@ -89,7 +101,7 @@
                 email:'',
                 password:'',
                 phone:''
-            }
+            },
             },
 
             methods: {
@@ -99,7 +111,9 @@
                 }).then(function (data) {
                     this.msg = data.body;
                     if (this.msg === 'success') {
-                        this.getAllUsers();
+                        this.curr_page =0;
+                        this.users = [];
+                        this.getPageUsers();
                         this.$message({
                                 message: '解除冻结成功！',
                                 type: 'success'
@@ -115,7 +129,9 @@
                 }).then(function (data) {
                     this.msg = data.body;
                     if (this.msg === 'success') {
-                        this.getAllUsers();
+                        this.curr_page = 0;
+                        this.users = [];
+                        this.getPageUsers();
                     }
                 }, function (response) {
                     console.info(response);
@@ -139,7 +155,9 @@
                 }, {emulateJSON: true}).then(function (data) {
                     if (data.body === 'success') {
                         this.update_user.state = false;
-                        this.getAllUsers();
+                        this.curr_page = 0;
+                        this.users = [];
+                        this.getPageUsers();
                     }
                 }, function (response) {
                     console.info(response);
@@ -152,20 +170,23 @@
                                 message: ' 冻结成功！',
                                 type: 'success'
                             });
-                    this.getAllUsers()
+                    this.curr_page = 0;
+                    this.users = [];
+                    this.getPageUsers()
                 } else {
                     this.$message.error('冻结失败，请联系管理员')
                 }
             })
             },
-            getAllUsers: function () {
-            this.$http.get('/users').then(function (data) {
-                this.users = data.body;
+            getPageUsers: function () {
+            this.curr_page += 1;
+            this.$http.get('/users',{params:{'curr_page':this.curr_page}}).then(function (data) {
+                this.users = this.users.concat(data.body);
             })}
             },
 
             created: function () {
-                this.getAllUsers();
+                this.getPageUsers();
             }
         });
 </script>

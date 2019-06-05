@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}首页
-
+{% block title %}
+    新闻
 {% endblock %}
 {% block head %}
     {{ super() }}
@@ -21,36 +21,44 @@
         color: #FF7E00;
         text-decoration:underline;
     }
-    a:visited {
-        color:#666666;
-        text-decoration:none;
+    .edit-button{
+        width: 30%;
+        display: block;
+        margin: 30px 300px 20px 800px;
     }
+    .editor-title{
+        margin: 0 0 10px 0;
+    }
+    .editor{
+        margin: 0 0 10px 0;
+        width: 80%;
+        height: 250px;
+    }
+
     </style>
+    <link rel="stylesheet" type="text/css" href="../static/dist/css/wangEditor.min.css">
+
 {% endblock %}
 
 {% block content %}
+
+<div id="fuck">
+
+</div>
+
 <div id="news">
-
+    {% if current_user.is_admin %}
+    <el-button @click="edit_news=!edit_news" class="edit-button" >
+            编辑新闻
+    </el-button>
     <el-row type="flex" justify="center">
-        <h1>新闻通知</h1>
-    </el-row>
-    <el-row type="flex" justify="center" >
-            {% if current_user.is_admin %}
-            <div >
-
-
-            <el-input v-model="pub_new.title" placeholder="请输入新闻标题"></el-input>
-            <el-input
-                    type="textarea"
-                    :rows="3"
-                    placeholder="请输入新闻内容"
-                    v-model="pub_new.content"
-                    style="margin-top: 5px">
-            </el-input>
+            <div v-show="edit_news">
+            <el-input v-model="pub_new.title" placeholder="请输入新闻标题" class="editor-title"></el-input>
+            <div id="editor" class="editor"><p> 新闻内容</p></div>
             <el-button type="primary" size="small" @click="pubNews" style="margin-top: 5px">发布新闻</el-button>
             </div>
-            {% endif %}
     </el-row>
+    {% endif %}
     <el-row id="row">
         <ul>
        <li v-for="n in news" id="li-news">
@@ -69,8 +77,13 @@
 </div>
 {% endblock %}
 {% block vue %}
+{#<script type="text/javascript" src="/static/js/wangEditor.min.js"></script>#}
+{#<script src="//unpkg.com/wangeditor/release/wangEditor.min.js"></script>#}
+<script type="text/javascript" src="../static/dist/js/lib/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="../static/dist/js/wangEditor.min.js"></script>
 <script>
     app.activeIndex= 'news';
+
     new Vue({
             el: '#news',
             data: {
@@ -79,12 +92,17 @@
                     state: false,
                     title: '',
                     content: ''
-                }
+                },
+                edit_news:false,
+                edt:''
             },
 
             methods: {
                 goToNews:function (id) {
                   window.location.href = '/news_detail/' + id
+                },
+                editNews:function () {
+                    this.edit_news = true
                 },
                 delNews:function (id) {
                     this.$http.get('/del_news', {
@@ -116,10 +134,9 @@
                         this.msg = data.body;
                         if (this.msg === 'success') {
                             this.getAllNews();
-
+                            this.edt.clear();
+                            this.edit_news = false
                         }
-                    }, function (response) {
-                        console.info(response);
                     })
                 },
                 getAllNews: function () {
@@ -133,7 +150,26 @@
 
             created: function () {
                 this.getAllNews();
-            }
+
+
+            },
+            mounted:function () {
+            let self = this;
+            const editor = new wangEditor('editor');
+
+            editor.onchange = function () {
+                    // onchange 事件中更新数据
+                    self.pub_new.content = editor.$txt.html();
+                    console.log(editor.$txt.html())
+                };
+            editor.config.uploadImgUrl = '/upload_img';
+            editor.config.uploadImgFileName = 'files';
+            editor.config.uploadHeaders = {
+                'Accept' : 'text/x-json'
+            };
+            editor.create();
+            self.edt = editor
+        }
         });
 </script>
 {% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}用户信息{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+    <div id = "register">
+        <el-row type="flex" justify="center">
+            <h1>用户信息</h1>
+        </el-row>
+        <el-row type="flex" justify="center">
+            <el-col :span="10">
+
+            <el-form ref="form"  :model="user" label-width="80px" :label-position="left">
+                <el-form-item label="登录账号">
+                <el-input v-model="user.account" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="用户名">
+                <el-input v-model="user.username"></el-input>
+                </el-form-item>
+                <el-form-item label="密码">
+                <el-input v-model="user.password" type="password" placeholder="若修改密码请输入新密码"></el-input>
+                </el-form-item>
+                <el-form-item label="邮箱">
+                <el-input v-model="user.email" placeholder="请输入新邮箱"></el-input>
+                </el-form-item>
+                <el-form-item label="手机">
+                <el-input v-model="user.phone" placeholder="请输入新手机"></el-input>
+                </el-form-item>
+                <el-form-item label="注册时间" >
+                <el-input v-model="user.register_date" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item>
+                <el-button type="primary" @click="update">更新</el-button>
+                </el-form-item>
+            </el-form>
+            </el-col>
+
+        </el-row>
+    </div>
+{% endblock %}
+{% block vue %}
+
+    <script>
+        new Vue({
+            el: '#register',
+            data: {
+                user:{},
+                form: {
+                    account: '',
+                    password: ''
+                },
+                msg: ''
+            },
+            methods: {
+                update: function () {
+                    this.$http.post('/update_user_info', {
+                        username: this.user.username,
+                        password: this.user.password,
+                        email:this.user.email,
+                        phone:this.user.phone,
+
+
+                    }, {emulateJSON: true}).then(function (data) {
+                        this.msg = data.body;
+                        if(this.msg === 'success') {
+                            this.$message({
+                                message:'更新成功',
+                                type:'success'
+                            });
+                            location.reload()
+                        } else {
+                            this.$message.error(this.msg);
+                        }
+                    })
+                }
+            },
+            created:function () {
+                this.user.username = '{{ current_user.username }}';
+                this.user.account = '{{ current_user.account }}';
+                this.user.password = '';
+                this.user.email = '{{ current_user.email }}';
+                if (this.user.email === 'None') {
+                    this.user.email = ''
+                }
+
+                this.user.phone = '{{ current_user.phone }}';
+                this.user.register_date = '{{ current_user.register_date }}';
+                if (this.user.phone === 'None') {
+                    this.user.phone = ''
+                }
+            }
+        })
+    </script>
+{% endblock %}

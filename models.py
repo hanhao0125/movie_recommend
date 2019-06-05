@@ -6,6 +6,7 @@ import xlrd
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 from flask_login import UserMixin
+import pandas as pd
 import json
 import uuid
 from sqlalchemy.sql import func
@@ -24,6 +25,7 @@ class Movie(db.Model):
     video_path = db.Column(db.String(200))
     collect_num = db.Column(db.Integer, default=0)
     eva_num = db.Column(db.Integer, default=0)
+    img_path = db.Column(db.String(200), default='/static/img/front.jpg')
 
     def __init__(self, name):
         self.name = name
@@ -190,6 +192,7 @@ class Qa(db.Model):
     from_where = db.Column(db.String(10))
     suggest = db.Column(db.String(300))
     submit_date = db.Column(db.DateTime)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __init__(self, sex, favorite_genre, score, from_where, suggest):
         self.sex = sex
@@ -198,6 +201,9 @@ class Qa(db.Model):
         self.from_where = from_where
         self.suggest = suggest
         self.submit_date = datetime.now()
+
+    def __repr__(self):
+        return str(self.user_id)
 
 
 def import_user():
@@ -208,6 +214,24 @@ def import_user():
         user.phone = '1786678' + str(i)
 
         db.session.add(user)
+    db.session.commit()
+
+
+def import_user2():
+    d = pd.read_csv('apriori/ml-100k/u.data',
+                    delimiter="\t", header=None, encoding="mac-roman",
+                    names=["UserID", "MovieID", "Rating", "DateTime"])
+    for i in d['UserID'].unique():
+        u = User.query.get(int(i))
+        if u is None:
+            j = str(i)
+            user = User(j + str(random.randint(1, 100000)))
+            user.username = j
+            user.hash_password(j)
+            user.email = str(j)
+            user.id = int(i)
+            print(i)
+            db.session.add(user)
     db.session.commit()
 
 
@@ -224,6 +248,38 @@ def import_movie():
         movie.actor = value[14]
         db.session.add(movie)
     db.session.commit()
+
+
+def import_movie2():
+    movie_name_data = pd.read_csv('apriori/ml-100k/u.item', delimiter="|", header=None, encoding="mac-roman")
+    movie_name_data.columns = ["MovieID", "Title", "Release Date", "Video Release", "IMDB", "<UNK>", "Action",
+                               "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary", "Drama",
+                               "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller",
+                               "War", "Western"]
+    for i in movie_name_data.loc[:, ['MovieID', 'Title']].values:
+        movie = Movie.query.get(int(i[0]))
+        if movie is None:
+            movie = Movie(name=i[1])
+            movie.id = int(i[0])
+            movie.genre = '动作'
+            movie.director = 'unknown'
+            movie.actor = 'unknown'
+            db.session.add(movie)
+    db.session.commit()
+
+
+def import_movie_comments():
+    d = pd.read_csv('apriori/ml-100k/u.data',
+                    delimiter="\t", header=None, encoding="mac-roman",
+                    names=["UserID", "MovieID", "Rating", "DateTime"])
+    for i in d.values:
+        print(i)
+        k = MovieEva('好')
+        k.movie_id = int(i[1])
+        k.user_id = int(i[0])
+        k.score = 2 * int(i[2])
+        db.session.add(k)
+        db.session.commit()
 
 
 def generate_movie_comments():
@@ -260,21 +316,21 @@ def update_movie_score():
     movies = Movie.query.all()
     for m in movies:
         m.video_path = '/static/video/test.mp4'
-        if m.views is None:
-            m.views = 0
 
-            print(m.name)
-        if m.score is None:
-            m.score = 0.0
+        avg_score = db.session.query(func.avg(MovieEva.score)
+                                     .label('average')).filter(MovieEva.movie_id == m.id).first()[0]
+        m.score = avg_score
     db.session.commit()
 
 
 def update_movie_eva():
     m = MovieEva.query.all()
     for i in m:
+        i.user_id = 668
         if i.user is None:
-            i.user_id = 26
+            i.user_id = 668
     db.session.commit()
+
 
 def update_movie_num():
     movies = Movie.query.all()
@@ -285,13 +341,28 @@ def update_movie_num():
         m.eva_num = len(en)
     db.session.commit()
 
+
+def init_db():
+    db.drop_all()
+    db.create_all()
+    db.session.commit()
+    import_user()
+    import_movie()
+    generate_movie_comments()
+    generate_qa()
+    update_movie_score()
+
+
+def import_user_collection():
+    for i in range(300, 500):
+        uc = UserCollection(i, 668)
+        db.session.add(uc)
+    db.session.commit()
+
+
 if __name__ == '__main__':
-    # db.drop_all()
-    # db.create_all()
-    # db.session.commit()
-    # import_user()
-    # import_movie()
-    # generate_movie_comments()
-    # generate_qa()
-    # update_movie_score()
-    update_movie_num()
+    # import_user2()
+    # import_movie2()
+    update_movie_eva()
+
+    # import_user_collection()

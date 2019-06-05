@@ -1,21 +1,24 @@
-import datetime
 import json
 import os
+from functools import wraps
 
-from flask import (Response, jsonify, make_response, redirect, render_template,
-                   request, send_file, send_from_directory, url_for)
+from flask import (jsonify, redirect, render_template,
+                   request, send_file, url_for, abort)
 from flask_login import (LoginManager, current_user, login_required,
                          login_user, logout_user)
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
-
 import models
+from apriori import apriori
 from settings import app, db
+import datetime
 
 VIDEO_SAVE_PATH = 'video/'
-PAGE_SIZE = 10
-# app.secret_key = os.urandom(24)
+PAGE_SIZE = 50
+COMMENT_PAGE_SIZE = 20
+MODEL_PATH = 'support-0.1-confidence-0.7.pkl'
 
+ACCESS_IP = {}
 # use login manager to manage session
 login_manager = LoginManager()
 # login_manager.session_protection = 'strong'
@@ -29,6 +32,22 @@ def load_user(id):
         return models.User.query.get(int(id))
     except:
         return None
+
+
+def admin_required():
+    def decorator(func):
+        @wraps(func)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                abort(401)
+            if current_user.is_admin:
+                return func(*args, **kwargs)
+            else:
+                abort(403)
+
+        return decorated_function
+
+    return decorator
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -57,7 +76,6 @@ def register():
     if request.method == 'POST':
         account = request.form['account']
         password = request.form['password']
-        print(account, password)
         user = models.User.query.filter(models.User.account == account).first()
         if user is not None:
             return jsonify('用户名已存在！')
@@ -66,7 +84,6 @@ def register():
             user.hash_password(password)
             db.session.add(user)
             db.session.commit()
-            print(user)
         return jsonify('success')
     else:
         return render_template('register.html')
@@ -74,9 +91,7 @@ def register():
 
 @app.route('/')
 @app.route('/main')
-@login_required
 def main():
-    print(request.remote_addr)
     return render_template(
         'movieIndex.html')
 
@@ -90,8 +105,12 @@ def logout():
 
 
 @app.route('/users')
+@admin_required()
 def get_all_users():
-    users = models.User.query.limit(50)
+    curr_page = request.args.get('curr_page')
+    curr_page = 1 if curr_page is None else int(curr_page)
+    users = models.User.query.limit(PAGE_SIZE).offset(
+        (curr_page - 1) * PAGE_SIZE)
     res = []
     for i in users:
         res.append({'id': i.id, 'username': i.username, 'account': i.account,
@@ -101,7 +120,7 @@ def get_all_users():
 
 
 @app.route('/give_admin', methods=['GET'])
-@login_required
+@admin_required()
 def give_admin():
     id = request.args.get('id')
     user = models.User.query.get(id)
@@ -113,7 +132,7 @@ def give_admin():
 
 
 @app.route('/update_user', methods=['POST'])
-@login_required
+@admin_required()
 def update_user():
     email = request.form['email']
     phone = request.form['phone']
@@ -154,7 +173,7 @@ def get_news(id):
 
 
 @app.route('/del_user')
-@login_required
+@admin_required()
 def delete_user():
     account = request.args.get('account')
 
@@ -169,7 +188,7 @@ def delete_user():
 
 
 @app.route('/freeze_user')
-@login_required
+@admin_required()
 def freeze_user():
     id = request.args.get('id')
     u = models.User.query.get(id)
@@ -182,7 +201,7 @@ def freeze_user():
 
 
 @app.route('/release_freeze')
-@login_required
+@admin_required()
 def release_freeze():
     id = request.args.get('id')
     u = models.User.query.get(id)
@@ -195,7 +214,7 @@ def release_freeze():
 
 
 @app.route('/pub_news', methods=['POST'])
-@login_required
+@admin_required()
 def publish_news():
     title = request.form['title']
     content = request.form['content']
@@ -209,7 +228,7 @@ def publish_news():
 
 
 @app.route('/del_news', methods=['GET'])
-@login_required
+@admin_required()
 def delete_news():
     id = request.args.get('id')
     if id is None:
@@ -239,7 +258,7 @@ def get_all_movies():
 
 
 @app.route('/update_movie', methods=['POST'])
-@login_required
+@admin_required()
 def update_movie():
     name = request.form['name']
     id = request.form['id']
@@ -268,6 +287,7 @@ def get_movies_count():
 
 
 @app.route('/del_movie')
+@admin_required()
 def del_movie():
     id = request.args.get('id')
     movie = models.Movie.query.get(id)
@@ -329,9 +349,10 @@ def get_page_movie():
         'genre': m.genre,
         'actor': m.actor,
         'director': m.director,
-        'score': str(m.score),
-        'views': str(m.views),
-        'video_path': m.video_path
+        'score': m.score,
+        'views': m.views,
+        'video_path': m.video_path,
+        'img_path': m.img_path
     } for m in movies]
     return jsonify(res)
 
@@ -371,7 +392,7 @@ def get_all_guests():
 
 
 @app.route('/del_guest', methods=['GET'])
-@login_required
+@admin_required()
 def del_guest():
     id = request.args.get('id')
     g = models.GuestBook.query.filter(id == models.GuestBook.id).first()
@@ -395,11 +416,13 @@ def leave_message():
 
 
 @app.route('/movie_manage')
+@admin_required()
 def movie_manage():
     return render_template('movieManage.html')
 
 
 @app.route('/movie_category')
+@admin_required()
 def get_all_category():
     c = models.MovieCategory.query.order_by(db.desc(models.MovieCategory.create_date)).all()
     res = [{'id': i.id, 'create_date': str(i.create_date),
@@ -408,6 +431,7 @@ def get_all_category():
 
 
 @app.route('/create_category', methods=['POST'])
+@admin_required()
 def create_category():
     c = request.form['category']
     desc = request.form['desc']
@@ -418,6 +442,7 @@ def create_category():
 
 
 @app.route('/movies_from_category')
+@admin_required()
 def get_movies_from_category():
     category_id = request.args.get('id')
     movies = models.MovieCatRe.query.filter(models.MovieCatRe.movie_cat_id == category_id).all()
@@ -432,6 +457,7 @@ def get_movies_from_category():
 
 
 @app.route('/add_movie', methods=['POST'])
+@admin_required()
 def add_movie():
     name = request.form['name']
     director = request.form['director']
@@ -447,6 +473,7 @@ def add_movie():
 
 
 @app.route('/movies_not_from_category')
+@admin_required()
 def get_movies_not_from_category():
     category_id = request.args.get('id')
     movies = models.MovieCatRe.query.filter(models.MovieCatRe.movie_cat_id == category_id).all()
@@ -460,6 +487,7 @@ def get_movies_not_from_category():
 
 
 @app.route('/add_movie_to_category', methods=['POST'])
+@admin_required()
 def add_movie_to_category():
     category_id = request.form['category_id']
     ids = request.form['ids']
@@ -473,6 +501,7 @@ def add_movie_to_category():
 
 
 @app.route('/del_movie_from_category', methods=['POST'])
+@admin_required()
 def del_movie_from_category():
     _id = request.form['id']
     m = models.MovieCatRe.query.filter(models.MovieCatRe.id == _id).first()
@@ -485,7 +514,7 @@ def del_movie_from_category():
 
 
 @app.route('/update_category', methods=['POST'])
-@login_required
+@admin_required()
 def update_category():
     id = request.form['id']
     name = request.form['name']
@@ -501,6 +530,7 @@ def update_category():
 
 
 @app.route('/del_category')
+@admin_required()
 def delete_category():
     id = request.args.get('id')
 
@@ -523,9 +553,17 @@ def delete_category():
 def movie_details_page(movie_id):
     movie = models.Movie.query.get(int(movie_id))
     # 更新访问次数
-    # todo 同一 ip 相近时间段内重复访问应该记做一次
-    movie.views += 1
-    db.session.commit()
+    global ACCESS_IP
+    try:
+        now = datetime.datetime.now()
+        ACCESS_IP = {k: v for k, v in ACCESS_IP.items() if (now - k).seconds < 60}
+        ips = set(ACCESS_IP.values())
+        if request.remote_addr not in ips:
+            movie.views += 1
+            ACCESS_IP[datetime.datetime.now()] = request.remote_addr
+        db.session.commit()
+    except:
+        return render_template('movieDetail.html', movie=movie)
     return render_template('movieDetail.html', movie=movie)
 
 
@@ -543,25 +581,32 @@ def movie_details():
          'views': movie.views,
          'video_path': movie.video_path,
          'collect_num': movie.collect_num,
-         'eva_number': movie.eva_num
+         'eva_num': movie.eva_num,
+         'img_path': movie.img_path
          }
     )
 
 
 @app.route('/movie_video/<movie_id>')
+@login_required
 def get_movie_video(movie_id):
     movie = models.Movie.query.get(int(movie_id))
     if movie is not None:
-        return send_file(movie.video_path[1:])
+        return send_file(movie.video_path[1:], as_attachment=True)
     else:
         return 'error'
 
 
+# 分页
 @app.route('/movie_comments')
 def get_all_movie_comments():
     movie_id = request.args.get('movie_id')
+    curr_page = int(request.args.get('curr_page'))
+    curr_page = 1 if curr_page is None else curr_page
     comments = models.MovieEva.query.order_by(db.desc(models.MovieEva.eva_date)).filter(
-        models.MovieEva.movie_id == movie_id).all()
+        models.MovieEva.movie_id == movie_id).limit(COMMENT_PAGE_SIZE).offset(
+        (curr_page - 1) * COMMENT_PAGE_SIZE)
+
     res = [{
         'id': c.id,
         'eva_date': str(c.eva_date),
@@ -591,7 +636,6 @@ def add_new_comments():
     # 更新 movie 表中的平均得分
     avg_score = db.session.query(func.avg(models.MovieEva.score)
                                  .label('average')).filter(models.MovieEva.movie_id == movie_id).first()[0]
-    print(avg_score)
     movie = models.Movie.query.get(movie_id)
     if movie is not None:
         movie.score = avg_score
@@ -603,12 +647,18 @@ def add_new_comments():
 
 
 @app.route('/questionnaire')
+@login_required
 def questionnaire_page():
     return render_template('questionnaire.html')
 
 
 @app.route('/submit_qa', methods=['POST'])
+@login_required
 def add_qa():
+    user_id = current_user.id
+    q = models.Qa.query.filter(models.Qa.user_id == user_id).first()
+    if q is not None:
+        return jsonify({'res': '该问卷只能填写一次'})
     sex = request.form['sex']
     favorite_genre = request.form['favorite_genre']
     score = request.form['score']
@@ -616,9 +666,10 @@ def add_qa():
     suggest = request.form['suggest']
 
     qa = models.Qa(sex, favorite_genre, score, from_where, suggest)
+    qa.user_id = user_id
     db.session.add(qa)
     db.session.commit()
-    return jsonify('success')
+    return jsonify({'res': 'success'})
 
 
 @app.route('/st_page')
@@ -706,7 +757,7 @@ def get_all_my_collections():
 
 
 @app.route('/del_collection')
-@login_required
+@admin_required()
 def del_collection():
     id = request.args.get('id')
     if id is None:
@@ -721,6 +772,7 @@ def del_collection():
 
 
 @app.route('/upload_video/<movie_id>', methods=['POST', 'GET'])
+@admin_required()
 def upload(movie_id):
     if movie_id is None:
         return jsonify('error')
@@ -738,6 +790,101 @@ def upload(movie_id):
 
     db.session.commit()
     return jsonify({'res': 'success', 'video_path': movie.video_path})
+
+
+@app.route('/update_movie_front/<movie_id>', methods=['POST', 'GET'])
+@admin_required()
+def update_movie_front(movie_id):
+    if movie_id is None:
+        return jsonify('error')
+    movie = models.Movie.query.get(int(movie_id))
+    if movie is None:
+        return jsonify('error')
+
+    f = request.files['file']
+    basepath = os.path.dirname(__file__)  # 当前文件所在路径
+    filename = str(datetime.datetime.now()) + f.filename
+    upload_path = os.path.join(basepath, 'static/img', secure_filename(filename))  # 注意：没有的文件夹一定要先创建，不然会提示没有该路径
+    f.save(upload_path)
+
+    movie.img_path = '/static/img/' + secure_filename(filename)
+
+    db.session.commit()
+    return jsonify({'res': 'success', 'img_path': movie.img_path})
+
+
+@app.route('/upload_img', methods=['POST', 'GET'])
+@admin_required()
+def upload_news_img():
+    f = request.files['files']
+    basepath = os.path.dirname(__file__)  # 当前文件所在路径
+    filename = str(datetime.datetime.now()) + f.filename
+    upload_path = os.path.join(basepath, 'static/news-img', secure_filename(filename))  # 注意：没有的文件夹一定要先创建，不然会提示没有该路径
+    f.save(upload_path)
+    res = "/static/news-img/" + secure_filename(filename)
+    return res
+
+
+@app.route('/news_details/<id>')
+def nd(id):
+    news = models.News.query.get(int(id))
+    return jsonify({
+        'pub_date': str(news.pub_date),
+        'title': news.title,
+        'content': news.content,
+        'user': news.user.username
+    })
+
+
+@app.route('/recommend_movies')
+@login_required
+def recommend_movies():
+    user_id = current_user.id
+    res = apriori.recommend_by_user_id(user_id, model_path=MODEL_PATH)
+    return jsonify(res)
+
+
+@app.route('/training_apriori')
+@admin_required()
+def training():
+    support = float(request.args.get('support'))
+    confidence = float(request.args.get('confidence'))
+    global MODEL_PATH
+    # try:
+    MODEL_PATH = apriori.generate_rules(min_support=support, min_confidence=confidence)
+    # except Exception as e:
+    #     print(e)
+    #     return jsonify({
+    #         'message': 'error'
+    #     })
+    sampels_rules, rules_num = apriori.samples_of_rules(MODEL_PATH)
+    return jsonify({
+        'rules': sampels_rules,
+        'num': rules_num,
+        'message': 'success'
+    })
+
+
+@app.route('/update_user_info', methods=['POST'])
+@login_required
+def uu_info():
+    username = request.form['username']
+    password = request.form['password']
+    email = request.form['email']
+    phone = request.form['phone']
+    user_id = current_user.id
+    user = models.User.query.get(int(user_id))
+
+    if password:
+        user.password = user.hash_password(password)
+    if username:
+        user.username = username
+    if email:
+        user.email = email
+    if phone:
+        user.phone = phone
+    db.session.commit()
+    return jsonify('success')
 
 
 @app.route('/news_detail/<id>')
@@ -762,11 +909,13 @@ def news_page():
 
 
 @app.route('/user_manage')
+@admin_required()
 def user_manage():
     return render_template('user_manage.html')
 
 
 @app.route('/my_collection')
+@login_required
 def collection_page():
     return render_template('myCollection.html')
 
@@ -774,6 +923,23 @@ def collection_page():
 @app.route('/test')
 def just_test():
     return render_template('test.html')
+
+
+@app.route('/re_setting')
+@admin_required()
+def re_setting():
+    return render_template('recommend_setting.html')
+
+
+@app.route('/my_recommend')
+@login_required
+def my_recommed_page():
+    return render_template('my_recommend.html')
+
+
+@app.route('/user_info')
+def user_info():
+    return render_template('userInfo.html')
 
 
 if __name__ == '__main__':

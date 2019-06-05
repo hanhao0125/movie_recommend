@@ -1,57 +1,84 @@
 {% extends "base.html" %}
 {% block title %}
-    电影管理
+    电影详情
 {% endblock %}
 {% block head %}
     {{ super() }}
+    <style>
+       img{
+           float: left;
+     max-height:180px;
+     max-width: 300px;
+     vertical-align:middle;
+        overflow: hidden;
+ }
+    h1 {
+    word-wrap: break-word;
+    display: block;
+    font-size: 25px;
+    font-weight: bold;
+    color: #494949;
+    margin: 0;
+    padding: 0 0 15px 0;
+    line-height: 1.1;
+}
+    .pl {
+        margin: 2px 0 2px 15px;
+    font: 15px Arial, Helvetica, sans-serif;
+    line-height: 150%;
+    color: #666666;
+        display: block;
+}
+    .attr{
+    font: 15px Arial, Helvetica, sans-serif;
+    line-height: 150%;
+    color: #37a;
+    }
+    .score{
+    font: 15px Arial, Helvetica, sans-serif;
+    line-height: 150%;
+    color: rgb(224, 144, 21);
+    }
+    .admin_btn {
+        float: right;
+        display: block;
+        margin-left: 10px;
+    }
+    </style>
     <link href="https://cdn.jsdelivr.net/npm/video.js@6.6.2/dist/video-js.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vue-video-player@5.0.0/src/custom-theme.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<div id="movieDetails" style="margin-left: 150px;margin-right: 150px;margin-bottom: 50px" oncontextmenu = "return false">
-    <el-row type="flex" justify="center">
-        <h1>{{movie.name}}</h1>
-    </el-row>
-    <el-row :gutter="50"  style="margin-top: 10px;margin-bottom: 10px;font-size: larger">
-        <el-col :span="6">
-            <span style="color: #666666">导演：</span><span style="color: #37a">{{movie.director}}</span>
-        </el-col>
-        <el-col :span="6">
-            <span style="color: #666666">演员：</span><span style="color: #37a">{{movie.actor}}</span>
-        </el-col>
-        <el-col :span="6">
-            <span style="color: #666666">类型：</span><span>{{movie.genre}}</span>
-        </el-col >
-    </el-row>
-    <el-row style="margin-top: 10px;margin-bottom: 10px;font-size: larger" :gutter="50" >
-        <el-col :span="6">
-            <span style="color: #666666">评分：</span>{{movie.score}}
-        </el-col>
-        <el-col :span="6">
-            <span style="color: #666666">浏览次数：</span>{{movie.views}}
-        </el-col >
-        <el-col :span="6">
-            <span style="color: #666666">收藏次数：</span>{{movie.collect_num}}
-        </el-col >
-        <el-col :span="6">
-            <span style="color: #666666">评价次数：</span>{{ movie.eva_num }}
-        </el-col>
+<div id="movieDetails" style="margin: 50px 150px 50px 150px" oncontextmenu = "return false">
+    <h1>{{movie.name}}</h1>
 
-    </el-row>
-    <el-row>
-        </el-row>
-    <el-row style="margin-top: 10px;margin-bottom: 10px" type="flex" justify="center">
-        {% if current_user.is_authenticated %}
-            <el-button type="success" @click="downloadMovie">下载</el-button>
-            {% if current_user.is_admin == true %}
-            <el-button type="danger" @click="update_movie.show=true">更新电影信息</el-button>
-            {% endif %}
-            <el-button type="success" @click="mark_visible=true">收藏</el-button>
-        {% endif %}
+    <img :src="movie.img_path" :alt="movie.name">
 
-    </el-row>
-    <div v-if="fuck">
+    <div style="float: left">
+        <span class="pl">导演：<span class="attr">{{movie.director}}</span></span>
+        <span class="pl">演员：<span class="attr">{{movie.actor}}</span></span>
+        <span class="pl"> 类型：<span>{{movie.genre}}</span></span>
+        <span class="pl">评分：<span class="score">{{movie.score}}</span></span>
+        <span class="pl">浏览次数：{{movie.views}}</span>
+        <span class="pl">收藏次数：{{movie.collect_num}}</span>
+        <span class="pl">评价次数：{{movie.eva_num}}</span>
+    </div>
+    {% if current_user.is_admin == true %}
+    <el-upload :action="'/update_movie_front/' + movie.id" multiple
+               :on-success="successUpdate"
+                class="admin_btn">
+                <el-button type="danger">更新电影封面</el-button>
+    </el-upload>
+    <el-button type="danger" @click="update_movie.show=true" class="admin_btn">更新电影信息</el-button>
+    <el-upload :action="'/upload_video/' + movie.id" multiple
+               :on-success="successUpload" :on-progress="uploading"
+                class="admin_btn">
+            <el-button type="danger" >上传电影视频</el-button>
+    </el-upload>
+    {% endif %}
+
+    <div v-if="fuck" style="margin-top: 220px">
         <video-player class="vjs-custom-skin"
                         ref="videoPlayer"
                         :options="playerOptions"
@@ -59,15 +86,14 @@
                         >
           </video-player>
     </div>
-
-
-
+    <el-row style="margin-top: 10px;margin-bottom: 10px" type="flex" justify="center">
+        {% if current_user.is_authenticated %}
+            <el-button type="success" @click="downloadMovie">下载</el-button>
+            <el-button type="success" @click="mark_visible=true">收藏</el-button>
+        {% endif %}
+    </el-row>
     <el-row style="margin-top: 10px">
-    {% if current_user.is_admin == true %}
-    <el-upload :action="'/upload_video/' + movie.id" multiple :on-success="successUpload" :on-progress="uploading">
-            <el-button size="small" type="primary">上传电影视频</el-button>
-    </el-upload>
-    {% endif %}
+
     </el-row>
     <h2>《{{movie.name}}》的短评</h2>
     <el-row>
@@ -113,6 +139,12 @@
         </div>
             <p>{{c.comment}}</p>
     </el-card>
+
+    </el-row>
+    <el-row v-if="done">
+         <el-button @click="getPageComments" type="success" style="display: block;width: 30%;margin-top: 10px">
+            加载更多
+        </el-button>
     </el-row>
     <el-dialog
           title="收藏电影"
@@ -162,7 +194,9 @@
                 comment:'',
                 score:1
             },
+            done:true,
             comments:[],
+            curr_page:0,
             collect_id:-1,
             collect_mark:'',
             mark_visible:false,
@@ -184,10 +218,15 @@
                         // mp4
                         src: "/static/video/test.mp4"
                     }],
-                    poster: "/static/img/poster.jpg"
+                    poster: ""
                 }
         },
         methods: {
+            successUpdate:function (data,file,fileList) {
+                if (data['res'] === 'success') {
+                  this.movie.img_path = data['img_path'];
+              }
+            },
             // 上传时禁止用户播放，影响上传速度。
             uploading:function(){
                 this.player.pause()
@@ -244,6 +283,7 @@
                           message: '收藏成功！',
                           type: 'success'
                         });
+                        this.movie.collect_num += 1
                     } else if (data.body === 'collected') {
                         this.$message('已经收藏，请勿重复操作');
                     } else {
@@ -261,6 +301,7 @@
             getMovieDetails: function () {
                 this.$http.get('/movie_details',{params:{movie_id:{{ movie.id }}}}).then(function (data) {
                     this.movie = data.body;
+                    this.playerOptions.poster=this.movie.img_path;
                     this.reloadVideo(this.movie.video_path)
 
                 }, function (response) {
@@ -275,17 +316,25 @@
                     }, {emulateJSON: true}).then(function (data) {
                         data = data.body;
                         if (data['res'] === 'success') {
-                            this.getAllComments();
+                            this.curr_page = 0;
+                            this.comments = [];
+                            this.getPageComments();
                             this.movie.score= data['score'];
                             this.new_comment.comment = '';
-                            this.new_comment.score = 1
+                            this.new_comment.score = 1;
+                            this.movie.eva_num += 1
                         }
                     }, function (response) {
                     })
             },
-            getAllComments:function () {
-                this.$http.get('/movie_comments',{params:{movie_id:{{ movie.id }} }}).then(function (data) {
-                    this.comments = data.body;
+            getPageComments:function () {
+                this.curr_page += 1;
+                this.$http.get('/movie_comments',{params:{movie_id:{{ movie.id }},curr_page:this.curr_page }}).then(function (data) {
+                    if (data.body.length === 0) {
+                        this.done = false;
+                        return
+                    }
+                    this.comments = this.comments.concat(data.body);
                 }, function (response) {
                 })
             },
@@ -307,7 +356,7 @@
 
         created: function () {
             this.getMovieDetails();
-            this.getAllComments();
+            this.getPageComments();
         },
         computed: {
             player() {

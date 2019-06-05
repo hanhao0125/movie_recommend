@@ -6,3 +6,5 @@ app.config.from_object('config')
 db = SQLAlchemy(app)
 app.jinja_env.variable_start_string = '{{ '
 app.jinja_env.variable_end_string = ' }}'
+
+abs_path = '/Users/hanhao/PycharmProjects/apr_movie/apriori/'

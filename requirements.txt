@@ -10,3 +10,4 @@ flask-wtf
 werkzeug
 flask-login
 gunicorn
+mlxtend

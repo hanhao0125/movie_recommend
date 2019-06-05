@@ -2,11 +2,41 @@
 {% block title %}首页{% endblock %}
 {% block head %}
     {{ super() }}
+    <style>
+    img{
+     max-height:150px;
+     max-width: 200px;
+     vertical-align:middle;
+        overflow: hidden;
+ }
+    .item{display: block;
+    float: left;
+    color: #37a;
+    font-size: 13px;
+    text-align: center;
+    margin: 0 10px 10px 0;
+    width: 150px;
+    height: 200px;
+    overflow: hidden;
+    }
+    .more {
+    float: left;
+    display: block;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    font-size: 14px;
+    background: #f7f7f7;
+}
+    a:link {  color: #37a; text-decoration: none}
+    {#a:visited {  color: #000000; text-decoration: none}#}
+    a:hover {  color: black; text-decoration: none}
+    </style>
 {% endblock %}
 
 {% block content %}
 
-<div id="movieIndex" style="margin-top: 30px">
+<div id="movieIndex" style="margin: 30px 300px 50px 300px">
     <div>
         <el-row type="flex"  justify="center">
             <el-col :span="5" >
@@ -19,34 +49,25 @@
                     </el-option>
                 </el-select>
             </el-col>
-            <el-col :span="5">
+            <el-col :span="8" :offset="3">
                  <el-input placeholder="请输入内容" v-model="search_words">
                  <el-button slot="append" icon="el-icon-search" @click="searchMovies"></el-button>
                  </el-input>
             </el-col>
         </el-row>
     </div>
-    <el-row v-for="m in page_movies.movies" type="flex"  justify="center">
-    <el-col  :span="10"  style="margin-top: 10px">
-        <el-card class="box-card">
-            <div slot="header" style="font-size: large;font-weight: bold">
-            <span>{{m.name}}</span>
-                <el-button  type="primary" size="small" style="float: right;" @click="goToMovieDetails(m.id)">查看详情</el-button>
-            {% if current_user.is_authenticated %}
-                <el-button  type="success" size="small" style="float: right;margin-right: 3px" @click="collect_id=m.id;mark_visible=true">收藏</el-button>
-            {% endif %}
-            </div>
-        <div>
-            <p>导演：{{m.director}}</p>
-            <p>主演：{{m.actor}}</p>
-            <p>类型：{{m.genre}}</p>
-            <p>评分：<el-tag type="warning">{{m.score}}</el-tag></p>
-            <p>浏览次数：<el-tag type="success">{{m.views}}</el-tag></p>
-        </div>
-        </el-card>
-    </el-col>
-    </el-row>
+    <div style="text-align: center;margin-top: 30px;overflow: auto">
 
+    <div v-for="m in page_movies.movies">
+        <a :href="'/movie_details_page/' + m.id" class="item">
+            <img :src="m.img_path" :alt="m.name">
+            <p>{{m.name}}  <strong style="color:#e09015 ">{{m.score.toFixed(1)}}</strong></p>
+        </a>
+   </div>
+    </div>
+{#    <el-row type="flex"  justify="center">#}
+{#        <el-button @click="pageChange" style="width: 80%">加载更多</el-button>#}
+{#    </el-row>#}
 
     <el-dialog
       title="收藏电影"
@@ -55,7 +76,6 @@
       >
       <span>
           <el-input v-model="collect_mark"  type="textarea" :rows="2" placeholder="说点什么..."></el-input>
-
       </span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="mark_visible = false">取 消</el-button>
@@ -63,19 +83,18 @@
       </span>
     </el-dialog>
 
-    <div style="margin-top: 20px;margin-left: 500px;font-size: larger;margin-bottom: 30px">
-
+    <el-row type="flex" justify="center">
     <el-pagination
         background
-        :page-size="10"
+        :page-size="50"
         layout="prev, pager, next"
         @current-change="pageChange"
         :current-page.sync="page_movies.curr_page"
-        :total=movies_count
+        :total="movies_count"
+        :pager-count="17"
         v-if="showPagination">
     </el-pagination>
-    </div>
-
+    </el-row>
     </div>
 {% endblock %}
 {% block vue %}
@@ -112,7 +131,7 @@
                 collect_mark:'',
                 mark_visible:false,
                 collect_id:0,
-                showPagination:true
+                showPagination:false
             },
 
             methods: {
@@ -170,11 +189,14 @@
 
                 },
                 pageChange:function () {
-                    this.getPageMovies()
+
+                    this.getPageMovies();
+                    document.documentElement.scrollTop = 0
                 },
                 getMoviesCount: function () {
                     this.$http.get('/movies_count').then(function (data) {
                         this.movies_count = data.body;
+                        this.showPagination = true
                     })
 
                 }

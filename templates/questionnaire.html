@@ -82,9 +82,11 @@
                     from_where: this.form.from_where,
                     suggest: this.form.suggest
                 }, {emulateJSON: true}).then(function (data) {
-                    if (data.body === 'success') {
+                    if (data.body.res === 'success') {
                         window.location.href = '/'
 
+                    } else {
+                        this.$message.error(data.body.res)
                     }
                 }, function (response) {
                     console.info(response);

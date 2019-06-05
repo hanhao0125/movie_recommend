@@ -1,13 +1,19 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html lang="en">
 <head>
+<link rel="icon" href="/static/img/timg.ico" type="image/x-icon"/>
     <style type="text/css">
         #menu-item {
-            font-size: 20px;font-weight: bolder
+            font-size: 18px;font-weight: bolder
           }
         body{
             background-color: rgb(238, 238, 238);
             margin: 0 0 0 0;
+        }
+        .user-info{
+            font-size: 2px;
+            float: right;
+            font-weight: lighter;
         }
     </style>
     {% block head %}
@@ -43,11 +49,15 @@
             <el-menu-item index="userManage" id="menu-item">用户管理</el-menu-item>
             <el-menu-item index="movieManage" id="menu-item">电影管理</el-menu-item>
             <el-menu-item index="infoStatistics" id="menu-item">信息统计</el-menu-item>
+            <el-menu-item index="recommendSetting" id="menu-item">推荐设置</el-menu-item>
             {% endif %}
             {% if current_user.is_authenticated %}
                 <el-menu-item index="myCollection" id="menu-item">我的收藏</el-menu-item>
+                <el-menu-item index="myRecommend" id="menu-item">我的推荐</el-menu-item>
                 <el-menu-item index="questionnaire" id="menu-item">问卷调查</el-menu-item>
                 <el-menu-item index="logout" style="float: right" id="menu-item">注销</el-menu-item>
+                <el-menu-item index="userInfo" class="user-info">欢迎您，{{ current_user.username }}</el-menu-item>
+
             {% else %}
                 <el-menu-item index="login" style="float: right" id="menu-item">登录</el-menu-item>
             {% endif %}
@@ -63,6 +73,7 @@
 
 {% endblock %}
 </body>
+<script src="https://cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/vue/dist/vue.js"></script>
 <script type="text/javascript" src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
@@ -79,9 +90,11 @@
                     this.activeIndex = 'myCollection';
                     window.location.href = '/my_collection'
                 }
-                if (key === "userManage") {
+                else if (key === "userManage") {
                     this.activeIndex = 'userManage';
                     window.location.href = '/user_manage'
+                } else if (key === 'myRecommend') {
+                     window.location.href = '/my_recommend'
                 }
                 else if (key === "infoStatistics") {
                         this.activeIndex = 'infoStatistics';
@@ -120,6 +133,10 @@
                 } else if (key === 'login') {
                     this.activeIndex = 'login';
                     window.location.href = '/login'
+                } else if (key === 'recommendSetting') {
+                    window.location.href = '/re_setting'
+                } else if (key === 'userInfo') {
+                    window.location.href = '/user_info'
                 }
             }
         },

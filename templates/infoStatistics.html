@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}电影管理{% endblock %}
+{% block title %}信息统计{% endblock %}
 {% block head %}
     {{ super() }}
 {% endblock %}
@@ -9,30 +9,30 @@
         <div id="info">
 
         </div>
-        <el-row :gutter="20">
-            <el-col :span="5" :offset="8">
-                会员人数：{{st.user_count}}
+
+        <el-row type="flex" justify="center">
+            <el-col :span="10">
+                 <template>
+                    <ve-pie :data="chartData" :title="from_title" legend-position="right"></ve-pie>
+                </template>
             </el-col>
-            <el-col :span="5">
-                收录电影：{{st.movie_count}}
+            <el-col :span="10">
+                <template>
+                    <ve-pie :data="favor_genre" legend-position="right" :title="favor_title"></ve-pie>
+                </template>
             </el-col>
+
+
         </el-row>
-        <el-row :gutter="20">
-            <el-col :span="5" :offset="8">
-                评论总数：{{st.eva_count}}
+        <el-row type="flex" justify="center">
+            <el-col :span="10">
+            <template >
+                <ve-histogram :data="site_info" :title="site_title" :legend-visible="false"></ve-histogram>
+            </template>
             </el-col>
-            <el-col :span="5">
-                留言总数：{{st.guest_count}}
-            </el-col>
+
         </el-row>
-        <template>
-            <h3 style="text-align: center">得知网站来源</h3>
-            <ve-pie :data="chartData" ></ve-pie>
-        </template>
-        <template>
-                <h3>电影喜爱类型</h3>
-          <ve-pie :data="chartData" :settings="chartSettings"></ve-pie>
-        </template>
+
         <el-row>
             <el-col :span="15" :offset="10">
                 <h1>调查问卷统计信息</h1>
@@ -43,26 +43,10 @@
                 <p style="color: red">网站平均得分：{{st.score}}</p>
             </el-col>
         </el-row>
-        <el-row style="margin-left: 100px">
-            <el-col :offset="1">
-                <h4>电影喜爱类型:</h4>
-            </el-col>
-            <el-col v-for="k,v in st.favorite_genre" :span="4" :offset="1">
-                {{v}}:{{k}}
-            </el-col>
-
-        </el-row>
-        <el-row style="margin-left: 100px">
-            <el-col :offset="1">
-                <h4>详细信息:</h4>
-            </el-col>
-        </el-row>
-        <el-row type="flex" justify="center">
-
-
+        <div style="margin: 40px 200px 50px 200px">
             <el-table
                     :data="qa"
-                    style="margin-left: 100px;margin-right: 200px">
+                    >
                 <el-table-column
                         prop="sex"
                         label="性别"
@@ -94,25 +78,47 @@
                         align="center">
                 </el-table-column>
             </el-table>
-        </el-row>
+        </div>
 
     </div>
 {% endblock %}
 {% block vue %}
     <script src="https://cdn.bootcss.com/echarts/4.1.0.rc2/echarts-en.common.js"></script>
     <script src="//unpkg.com/echarts/dist/echarts.min.js"></script>
+    <script src="//unpkg.com/echarts/lib/component/title"></script>
+
     <script src="//unpkg.com/v-charts/lib/index.min.js"></script>
     <script>
         app.activeIndex = 'infoStatistics';
         v = new Vue({
             el: '#st',
             data: {
+                from_title:{
+                    text:'得知网站来源',
+                    x:'center',
+                },
+                favor_title:{
+                  text:'喜爱电影类型',
+                  x:'center'
+                },
                 chartData:{
                 columns: ['name','value'],
                 rows:[]
                 },
+                site_info:{
+                    columns:['name','value'],
+                    rows:[]
+                },
+                site_title:{
+                  text:'网站信息统计',
+                    x:'center'
+                },
                 st: {},
-                qa: []
+                qa: [],
+                favor_genre:{
+                    columns:['name','value'],
+                    rows:[]
+                }
         },
         methods: {
             getStatistics:function () {
@@ -126,7 +132,30 @@
                             })
                         }
                         this.chartData.rows = res;
-                        this.source_info.series[0].data = res;
+                        res = [];
+                        for (let i in this.st.favorite_genre) {
+                            res.push({
+                                name:i,
+                                value:this.st.favorite_genre[i]
+                            })
+                        }
+                        this.favor_genre.rows = res;
+                        this.site_info.rows = [{
+                            name:'收录电影',
+                            value:this.st.movie_count
+                        },{
+                            name:'会员人数',
+                            value:this.st.user_count
+                        },{
+                            name:'评价数目',
+                            value:this.st.eva_count
+                        }, {
+                            name:'留言数目',
+                            value:this.st.guest_count
+                        }, {
+                            name:'问卷数目',
+                            value:this.st.qa_count
+                        }]
                     }
                 )
             }
