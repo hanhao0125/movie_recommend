@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}首页{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+
+<div id="movieIndex" style="margin-top: 30px">
+    <div>
+        <el-row type="flex"  justify="center">
+            <el-col :span="5" >
+                <el-select v-model="sort_key" placeholder="排序" @change="sortMovieByKey">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-col>
+            <el-col :span="5">
+                 <el-input placeholder="请输入内容" v-model="search_words">
+                 <el-button slot="append" icon="el-icon-search" @click="searchMovies"></el-button>
+                 </el-input>
+            </el-col>
+        </el-row>
+    </div>
+    <el-row v-for="m in page_movies.movies" type="flex"  justify="center">
+    <el-col  :span="10"  style="margin-top: 10px">
+        <el-card class="box-card">
+            <div slot="header" style="font-size: large;font-weight: bold">
+            <span>{{m.name}}</span>
+                <el-button  type="primary" size="small" style="float: right;" @click="goToMovieDetails(m.id)">查看详情</el-button>
+            {% if current_user.is_authenticated %}
+                <el-button  type="success" size="small" style="float: right;margin-right: 3px" @click="collect_id=m.id;mark_visible=true">收藏</el-button>
+            {% endif %}
+            </div>
+        <div>
+            <p>导演：{{m.director}}</p>
+            <p>主演：{{m.actor}}</p>
+            <p>类型：{{m.genre}}</p>
+            <p>评分：<el-tag type="warning">{{m.score}}</el-tag></p>
+            <p>浏览次数：<el-tag type="success">{{m.views}}</el-tag></p>
+        </div>
+        </el-card>
+    </el-col>
+    </el-row>
+
+
+    <el-dialog
+      title="收藏电影"
+      :visible.sync="mark_visible"
+      width="30%"
+      >
+      <span>
+          <el-input v-model="collect_mark"  type="textarea" :rows="2" placeholder="说点什么..."></el-input>
+
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="mark_visible = false">取 消</el-button>
+        <el-button type="primary" @click="submitCollection">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <div style="margin-top: 20px;margin-left: 500px;font-size: larger;margin-bottom: 30px">
+
+    <el-pagination
+        background
+        :page-size="10"
+        layout="prev, pager, next"
+        @current-change="pageChange"
+        :current-page.sync="page_movies.curr_page"
+        :total=movies_count
+        v-if="showPagination">
+    </el-pagination>
+    </div>
+
+    </div>
+{% endblock %}
+{% block vue %}
+<script>
+    app.activeIndex= 'movieIndex';
+    new Vue({
+            el: '#movieIndex',
+            data: {
+                pub_new: {
+                    state: false,
+                    title: '',
+                    content: ''
+                },
+                page_movies:{
+                    movies:[],
+                    curr_page:1
+                },
+                movies_count:0,
+                options: [{
+                  value: 'score',
+                  label: '评分'
+                }, {
+                  value: 'views',
+                  label: '浏览量'
+                }, {
+                  value: 'add_date',
+                  label: '创建时间'
+                }, {
+                  value: 'name',
+                  label: '电影名称'
+                }],
+                sort_key: '',
+                search_words:'',
+                collect_mark:'',
+                mark_visible:false,
+                collect_id:0,
+                showPagination:true
+            },
+
+            methods: {
+                submitCollection:function() {
+                    this.$http.post('/collect_movie', {
+                        movie_id: this.collect_id,
+                        mark: this.collect_mark
+                    }, {emulateJSON: true}).then(function (data) {
+                        if (data.body=== 'success') {
+                            this.mark_visible = false;
+                            this.$message({
+                              message: '收藏成功！',
+                              type: 'success'
+                            });
+
+                        }
+                    }, function (response) {
+                        console.info(response);
+                    })
+                },
+                searchMovies:function(){
+                    if (this.search_words.length === 0) {
+                        return
+                    }
+                  this.getPageMovies();
+                  this.showPagination = false
+                },
+                sortMovieByKey:function(key){
+                    this.page_movies.curr_page = 1;
+                    this.getPageMovies()
+                },
+                goToMovieDetails:function (id) {
+                  window.location.href = '/movie_details_page/' + id
+                },
+                getAllMovies: function () {
+                    this.$http.get('/movies').then(function (data) {
+                        this.movies = data.body;
+                    }, function (response) {
+                        console.info(response);
+                    })
+
+                },
+                getPageMovies: function () {
+                    this.showPagination = true;
+                    if (this.search_words.length === 0) {
+                        this.search_words = '_none'
+                    }
+                    this.$http.get('/page_movies',{params:
+                            {curr_page:this.page_movies.curr_page,
+                             sort_key:this.sort_key,
+                             search_words:this.search_words}}).then(function (data) {
+                        this.page_movies.movies = data.body;
+                    });
+                    this.search_words = ''
+
+                },
+                pageChange:function () {
+                    this.getPageMovies()
+                },
+                getMoviesCount: function () {
+                    this.$http.get('/movies_count').then(function (data) {
+                        this.movies_count = data.body;
+                    })
+
+                }
+            },
+
+            created: function () {
+                this.getPageMovies();
+                this.getMoviesCount()
+            }
+        });
+    </script>
+{% endblock %}

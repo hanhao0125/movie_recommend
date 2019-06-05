@@ -1,81 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+{% extends "base.html" %}
+{% block title %}首页{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
 
-    <title>问卷调查</title>
-</head>
-<body>
-<div id="app">
-    <el-row>
-        <el-col :span="15" :offset="10">
-<h1>问卷调查</h1>
-        </el-col>
-        <el-col :offset="20">
-            <a href="/">主页</a>
-        </el-col>
+{% block content %}
+<div id="questionnaire">
+    <el-row type="flex" justify="center">
+        <h1>问卷调查</h1>
     </el-row>
-    <hr>
-<el-row>
-    <el-col :span="15" :offset="5">
+    <el-row type="flex"  justify="center">
+        <el-col :span="15">
 
+        <el-form ref="form" :model="form" label-width="300px" :label-position="left">
+        <el-form-item label="性别">
+        <el-radio-group v-model="form.sex">
+          <el-radio label="男"></el-radio>
+          <el-radio label="女"></el-radio>
+          <el-radio label="保密"></el-radio>
+        </el-radio-group>
+        </el-form-item>
+        <el-form-item label="喜爱电影类型">
+        <el-select v-model="form.favorite_genre" placeholder="请选择类型">
+          <el-option label="科幻" value="科幻"></el-option>
+          <el-option label="爱情" value="爱情"></el-option>
+          <el-option label="喜剧" value="喜剧"></el-option>
+          <el-option label="动作" value="动作"></el-option>
+          <el-option label="纪实" value="言情"></el-option>
+          <el-option label="玄幻" value="玄幻"></el-option>
+          <el-option label="其他" value="其他"></el-option>
 
-    <el-form ref="form" :model="form" label-width="300px" :label-position="left">
-  <el-form-item label="性别">
-    <el-radio-group v-model="form.sex">
-      <el-radio label="男"></el-radio>
-      <el-radio label="女"></el-radio>
-      <el-radio label="保密"></el-radio>
-    </el-radio-group>
-  </el-form-item>
-    <el-form-item label="喜爱电影类型">
-    <el-select v-model="form.favorite_genre" placeholder="请选择类型">
-      <el-option label="科幻" value="科幻"></el-option>
-      <el-option label="爱情" value="爱情"></el-option>
-      <el-option label="喜剧" value="喜剧"></el-option>
-      <el-option label="动作" value="动作"></el-option>
-      <el-option label="纪实" value="言情"></el-option>
-      <el-option label="玄幻" value="玄幻"></el-option>
-      <el-option label="其他" value="其他"></el-option>
-
-    </el-select>
-  </el-form-item>
-
-  <el-form-item label="从何种途径知道本网站">
-    <el-radio-group v-model="form.from_where">
-      <el-radio label="朋友介绍"></el-radio>
-      <el-radio label="百度搜索电影"></el-radio>
-      <el-radio label="商业推荐"></el-radio>
-      <el-radio label="无意发现"></el-radio>
-    </el-radio-group>
-  </el-form-item>
-    <el-form-item label="网站评分">
-        <el-rate
-          v-model="form.site_score"
-          show-text>
-        </el-rate>
-    </el-form-item>
-  <el-form-item label="网站建议">
-    <el-input type="textarea" v-model="form.suggest"></el-input>
-  </el-form-item>
-  <el-form-item>
-    <el-button type="primary" @click="onSubmit">提交</el-button>
-    <el-button>取消</el-button>
-  </el-form-item>
-</el-form>
-</el-col>
-</el-row>
+        </el-select>
+        </el-form-item>
+        <el-form-item label="从何种途径知道本网站">
+        <el-radio-group v-model="form.from_where">
+          <el-radio label="朋友介绍"></el-radio>
+          <el-radio label="百度搜索电影"></el-radio>
+          <el-radio label="商业推荐"></el-radio>
+          <el-radio label="无意发现"></el-radio>
+        </el-radio-group>
+        </el-form-item>
+        <el-form-item label="网站评分">
+            <el-rate
+              v-model="form.site_score"
+              show-text>
+            </el-rate>
+        </el-form-item>
+        <el-form-item label="网站建议">
+        <el-input type="textarea" v-model="form.suggest"></el-input>
+        </el-form-item>
+        <el-form-item>
+        <el-button type="primary" @click="onSubmit">提交</el-button>
+        <el-button>取消</el-button>
+        </el-form-item>
+    </el-form>
+    </el-col>
+    </el-row>
 
 </div>
-</body>
-<script type="text/javascript" src="https://unpkg.com/vue/dist/vue.js"></script>
-<script type="text/javascript" src="https://unpkg.com/element-ui/lib/index.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+{% endblock %}
+{% block vue %}
 <script>
-
+    app.activeIndex = 'questionnaire';
     new Vue({
-        el: '#app',
+        el: '#questionnaire',
         data: {
                form: {
                   sex: '',
@@ -109,5 +97,6 @@
         }
     })
 </script>
+{% endblock %}
 
-</html>
+

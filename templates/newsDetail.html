@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}首页
+
+{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+    #li-news{
+        margin-top: 20px;
+    }
+    #news-content{
+        font-size: larger;
+        margin-left: 200px;
+        margin-right: 200px
+    }
+    a:link{
+        color: black;
+        text-decoration:none;
+    }
+    a:hover{
+        color: #FF7E00;
+        text-decoration:underline;
+    }
+    a:visited {
+        color:#666666;
+        text-decoration:none;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div id="news">
+    <el-row type="flex" justify="center" style="text-align: center">
+        <h2>{{ news.title }}</h2>
+    </el-row>
+    <el-row type="flex" justify="center" style="text-align: center">
+        <p style="color: #666666"><span style="margin-right: 20px">{{ news.user.username }}</span>
+            <span>
+                {{ news.pub_date }}
+            </span></p>
+    </el-row>
+    <div  id="news-content">
+        <p>{{ news.content }}</p>
+    </div>
+</div>
+{% endblock %}
+{% block vue %}
+<script>
+    app.activeIndex= 'news';
+</script>
+{% endblock %}

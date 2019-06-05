@@ -17,15 +17,22 @@ class Movie(db.Model):
     genre = db.Column(db.String(120))
     actor = db.Column(db.String(120))
     director = db.Column(db.String(120))
-    views = db.Column(db.Integer)
+    views = db.Column(db.Integer, default=0)
     country = db.Column(db.String(20))
-    score = db.Column(db.Float)
+    score = db.Column(db.Float, default=0)
     add_date = db.Column(db.DateTime)
     video_path = db.Column(db.String(200))
+    collect_num = db.Column(db.Integer, default=0)
+    eva_num = db.Column(db.Integer, default=0)
 
     def __init__(self, name):
         self.name = name
-        self.add_date = datetime.utcnow()
+        self.add_date = datetime.now()
+        self.views = 0
+        self.score = 0
+        self.video_path = '/static/video/test.mp4'
+        self.collect_num = 0
+        self.eva_num = 0
 
     def __repr__(self):
         return 'Movie name=%s' % self.name
@@ -40,12 +47,14 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(32))
     phone = db.Column(db.String(32))
     is_admin = db.Column(db.Boolean)
+    is_freeze = db.Column(db.Boolean)
 
     def __init__(self, account):
         self.username = account
         self.account = account
-        self.register_date = datetime.utcnow()
+        self.register_date = datetime.now()
         self.is_admin = False
+        self.is_freeze = False
 
     def hash_password(self, password):
         self.password = generate_password_hash(password)
@@ -59,6 +68,9 @@ class User(db.Model, UserMixin):
 
     def admin(self):
         return self.is_admin
+
+    def freeze(self):
+        return self.is_freeze
 
     def __repr__(self):
         return 'User name=%s' % self.username
@@ -77,7 +89,7 @@ class News(db.Model):
         self.title = title
         self.content = content
         if pub_date is None:
-            self.pub_date = datetime.utcnow()
+            self.pub_date = datetime.now()
 
     def __repr__(self):
         return 'News content=%s' % self.content
@@ -88,9 +100,8 @@ class MovieEva(db.Model):
     eva_date = db.Column(db.DateTime)
     comment = db.Column(db.String(120))
     score = db.Column(db.Float)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # user = db.relationship('User', backref=db.backref('users', lazy='dynamic'))
 
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'))
     movie = db.relationship('Movie', backref=db.backref('movies', lazy='dynamic'))
     user = db.relationship('User', backref=db.backref('eva_user', lazy='dynamic'))
@@ -98,7 +109,7 @@ class MovieEva(db.Model):
     def __init__(self, comment, eva_date=None):
         self.comment = comment
         if eva_date is None:
-            self.eva_date = datetime.utcnow()
+            self.eva_date = datetime.now()
 
     def __repr__(self):
         return 'Movie_eva content=%s' % self.comment
@@ -114,7 +125,7 @@ class MovieCategory(db.Model):
         self.category = category
         self.desc = desc
         if create_date is None:
-            self.create_date = datetime.utcnow()
+            self.create_date = datetime.now()
 
     def __repr__(self):
         return 'Movie category=%s' % self.category
@@ -131,7 +142,7 @@ class GuestBook(db.Model):
     def __init__(self, content, pub_date=None):
         self.content = content
         if pub_date is None:
-            self.pub_date = datetime.utcnow()
+            self.pub_date = datetime.now()
 
     def __repr__(self):
         return 'Guest_book content=%s' % self.content
@@ -165,10 +176,10 @@ class UserCollection(db.Model):
     def __init__(self, movie_id, user_id):
         self.movie_id = movie_id
         self.user_id = user_id
-        self.collect_date = datetime.utcnow()
+        self.collect_date = datetime.now()
 
     def __repr__(self):
-        return 'movie_cat_re id=%d' % self.id
+        return 'user_collection id=%d' % self.id
 
 
 class Qa(db.Model):
@@ -186,7 +197,7 @@ class Qa(db.Model):
         self.score = score
         self.from_where = from_where
         self.suggest = suggest
-        self.submit_date = datetime.utcnow()
+        self.submit_date = datetime.now()
 
 
 def import_user():
@@ -248,10 +259,31 @@ def generate_qa():
 def update_movie_score():
     movies = Movie.query.all()
     for m in movies:
-        m.score = a[0]
-        print(m.score)
+        m.video_path = '/static/video/test.mp4'
+        if m.views is None:
+            m.views = 0
+
+            print(m.name)
+        if m.score is None:
+            m.score = 0.0
     db.session.commit()
 
+
+def update_movie_eva():
+    m = MovieEva.query.all()
+    for i in m:
+        if i.user is None:
+            i.user_id = 26
+    db.session.commit()
+
+def update_movie_num():
+    movies = Movie.query.all()
+    for m in movies:
+        cn = UserCollection.query.filter(UserCollection.movie_id == m.id).all()
+        m.collect_num = len(cn)
+        en = MovieEva.query.filter(MovieEva.movie_id == m.id).all()
+        m.eva_num = len(en)
+    db.session.commit()
 
 if __name__ == '__main__':
     # db.drop_all()
@@ -260,4 +292,6 @@ if __name__ == '__main__':
     # import_user()
     # import_movie()
     # generate_movie_comments()
-    generate_qa()
+    # generate_qa()
+    # update_movie_score()
+    update_movie_num()

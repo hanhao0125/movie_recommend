@@ -4,8 +4,11 @@
     {{ super() }}
 {% endblock %}
 {% block content %}
-    <div style="text-align: center;margin-top: 100px">
-        <h1>注册</h1>
+    <div id = "register">
+        <el-row type="flex" justify="center">
+            <h1>注册</h1>
+        </el-row>
+        <el-row type="flex" justify="center">
         <el-form ref="form" :model="form" label-width="80px">
             <el-form-item label="账户">
                 <el-input v-model="form.account" size="medium"></el-input>
@@ -13,18 +16,18 @@
             <el-form-item label="密码">
                 <el-input v-model="form.password" size="medium" type="password"></el-input>
             </el-form-item>
-            <p style="color: red">{{msg}}</p>
             <el-form-item>
                 <el-button type="primary" @click="register">注册</el-button>
             </el-form-item>
         </el-form>
+        </el-row>
     </div>
 {% endblock %}
 {% block vue %}
 
     <script>
         new Vue({
-            el: '#app',
+            el: '#register',
             data: {
                 form: {
                     account: '',
@@ -42,9 +45,9 @@
                         this.msg = data.body;
                         if(this.msg === 'success') {
                             window.location.href='/login'
+                        } else {
+                            this.$message.error(this.msg);
                         }
-                    }, function (response) {
-                        console.info(response);
                     })
                 }
             }

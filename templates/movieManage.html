@@ -1,29 +1,42 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html lang="en">
-<head>
-        <!-- import Vue.js -->
-        <!-- 引入样式 -->
-        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-        <!-- 引入组件库 -->
+{% extends "base.html" %}
+{% block title %}电影管理{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
 
-        <title>电影管理</title>
-
-</head>
-<body>
-    {#电影管理#}
-    <div id="app" style="margin-left: 200px;margin-right: 200px;margin-bottom: 50px">
-        <el-tabs v-model="activeName" type="border-card" @tab-click="handleClick">
+{% block content %}
+<div id="movieManage">
+    <el-row justify="center">
+    <el-tabs v-model="activeName" type="border-card" @tab-click="handleClick">
             <el-tab-pane label="电影" name="movie">
                 <el-button type="success"
                            @click="new_movie.state=true"
                            style=" float:right;margin-bottom: 5px;margin-right: 50px">
                     新增电影</el-button>
-                  <div v-for="m in page_movies.movies" style="margin-left:200px;margin-top:15px;margin-right: 200px">
+                <el-row type="flex"  justify="center">
+                    <el-col :span="8" >
+                        <el-select v-model="sort_key" placeholder="排序" @change="sortMovieByKey">
+                            <el-option
+                              v-for="item in options"
+                              :key="item.value"
+                              :label="item.label"
+                              :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-col>
+                    <el-col :span="5">
+                         <el-input placeholder="请输入内容" v-model="search_words">
+                         <el-button slot="append" icon="el-icon-search" @click="searchMovies"></el-button>
+                         </el-input>
+                    </el-col>
+                </el-row>
+              <div v-for="m in page_movies.movies" style="margin-left:200px;margin-top:15px;margin-right: 200px">
                     <el-card class="box-card">
                         <div slot="header" style="font-size: large;font-weight: bold">
                         <span>{{m.name}}</span>
                             <el-button  type="primary" size="small" @click="goToMovieDetails(m.id)" style="float: right;">查看详情</el-button>
-                        <el-button  type="danger" size="small" style="float: right;margin-right: 3px">删除</el-button>
+                        <el-button  type="danger" size="small" style="float: right;margin-right: 3px" @click="deleteMovie(m.id)">
+                            删除</el-button>
 
                         </div>
                     <div>
@@ -36,14 +49,14 @@
                     </el-card>
                 </div>
                 <div style="margin-top: 20px;margin-left: 500px;font-size: larger;">
-
                 <el-pagination
                     background
                     :page-size="10"
                     layout="prev, pager, next"
                     @current-change="pageChange"
                     :current-page.sync="page_movies.curr_page"
-                    :total=movies_count>
+                    :total=movies_count
+                    v-if="showPagination">
                 </el-pagination>
                 </div>
             </el-tab-pane>
@@ -78,57 +91,67 @@
                     </div>
             </el-tab-pane>
             <el-tab-pane label="管理类别" name="manage">
-                <h1>{{manage_category.category}}</h1>
+               <h1>{{manage_category.category}}</h1>
                 <el-button type="text" >创建于：{{manage_category.create_date}}</el-button>
                 <h3>共{{movies_from_category.length}}部电影 </h3>
                 <p style="color: darkgrey">{{manage_category.desc}}</p>
-                <el-button type="danger" @click="delCategory(manage_category.id)"
-                           style="margin-bottom: 5px;margin-left: 5px;">删除该类别</el-button>
+
+                <el-row type="flex" justify="center" style="margin-bottom: 20px">
+                <el-button type="success"
+                           @click="update_category.show=true"
+                           style="float: left">
+                    更新信息</el-button>
                 <el-button type="primary"
                            @click="addMovie2Cat"
                            style="float: left">
                     为类别新增电影</el-button>
-                <div style="margin-top: 10px">
+                <el-button type="danger" @click="delCategory(manage_category.id)"
+                           >删除该类别</el-button>
 
-                <p></p>
-                </div>
+                </el-row>
+                <el-row type="flex" justify="center" style="margin-left: 150px">
                 <el-table
                 :data="movies_from_category"
-                style="width: 100%"
-                border
-                height="400">
+                height="600">
                 <el-table-column
                         fixed
                         prop="name"
                         label="电影名称"
-                        width="180">
+                        width="180"
+                        align="center">
                 </el-table-column>
                 <el-table-column
+                        align="center"
                         prop="genre"
                         label="类型"
                         width="180">
                 </el-table-column>
                 <el-table-column
+                        align="center"
                         prop="director"
                         label="导演"
                         width="180">
                 </el-table-column>
                 <el-table-column
+                        align="center"
                         prop="actor"
                         label="演员"
                         width="280">
                 </el-table-column>
-                <el-table-column label="操作">
+                <el-table-column label="操作" width="180" align="center">
                     <template slot-scope="scope">
                         <el-button type="danger"  size="small" @click="delMovieFromCat(scope.row.re_id)">从该类别中删除</el-button>
                     </template>
 
                 </el-table-column>
             </el-table>
+            </el-row>
+
             </el-tab-pane>
          </el-tabs>
-        <div>
-            <el-dialog title="新增电影" :visible.sync="new_movie.state">
+        </el-row>
+    <div>
+        <el-dialog title="新增电影" :visible.sync="new_movie.state">
             电影名:<el-input v-model="new_movie.name" placeholder=""></el-input>
             导演：<el-input v-model="new_movie.director" style="margin-top: 5px"></el-input>
             演员：<el-input v-model="new_movie.actor" style="margin-top: 5px" placeholder="以空格隔开多个演员"></el-input>
@@ -138,54 +161,70 @@
                 <el-button type="primary" @click="addNewMovie">确 定</el-button>
             </div>
             </el-dialog>
-        </div>
-        <div>
-            <el-dialog title="添加电影" :visible.sync="add_movies.state" width="60%">
-             <el-table
-                :data="movies_not_from_category"
-                style="width: 100%"
-                border
-                height="400">
-                <el-table-column
-                        fixed
-                        prop="name"
-                        label="电影名称"
-                        width="200">
-                </el-table-column>
-                <el-table-column
-                        prop="director"
-                        label="导演"
-                        width="200">
-                </el-table-column>
-                <el-table-column label="操作">
-                    <template slot-scope="scope">
-                        <el-button type="primary"  size="small" @click="add2Category(scope)">添加至该类别</el-button>
-                    </template>
-
-                </el-table-column>
-            </el-table>
+    </div>
+    <div>
+        <el-dialog title="新增电影" :visible.sync="update_category.show">
+            类别名称:<el-input v-model="update_category.name" :placeholder="manage_category.category"></el-input>
+            类别描述：<el-input v-model="update_category.desc" style="margin-top: 5px" :placeholder="manage_category.desc"></el-input>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="add_movies.state = false">取 消</el-button>
-                <el-button type="primary" @click="post2DB">确 定</el-button>
+                <el-button @click="update_category.show = false">取 消</el-button>
+                <el-button type="primary" @click="updateCategory">确 定</el-button>
             </div>
             </el-dialog>
-        </div>
     </div>
+    <div>
+        <el-dialog title="添加电影" :visible.sync="add_movies.state" width="60%">
+            <el-input placeholder="请输入内容" v-model="sw" style="margin-bottom: 10px">
+            <el-button slot="append" icon="el-icon-search" @click="smForAdd"></el-button>
+             </el-input>
+         <el-table
+            :data="movies_not_from_category"
+            style="width: 100%"
+            border
+            height="400">
+            <el-table-column
+                    fixed
+                    prop="name"
+                    label="电影名称"
+                    width="200">
+            </el-table-column>
+            <el-table-column
+                    prop="director"
+                    label="导演"
+                    width="200">
+            </el-table-column>
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button type="primary"  size="small" @click="add2Category(scope)">添加至该类别</el-button>
+                </template>
 
-</body>
-<script type="text/javascript" src="https://unpkg.com/vue/dist/vue.js"></script>
-<script type="text/javascript" src="https://unpkg.com/element-ui/lib/index.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+            </el-table-column>
+        </el-table>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="add_movies.state = false">取 消</el-button>
+            <el-button type="primary" @click="post2DB">确 定</el-button>
+        </div>
+        </el-dialog>
+        </div>
+</div>
+{% endblock %}
+{% block vue %}
 <script>
+    app.activeIndex = 'movieManage';
+    new Vue({
+            el: '#movieManage',
 
-        new Vue({
-            el: '#app',
             data: {
                 activeName:'movie',
                 movie_category:[],
                 new_category:{
                     category:'',
                     desc:''
+                },
+                update_category:{
+                  show:false,
+                  name:'',
+                  desc:''
                 },
                 new_movie:{
                   category:1,
@@ -217,9 +256,44 @@
                     curr_page:1
                 },
                 movies_count:0,
-                movies_from_category:[]
+                movies_from_category:[],
+                options: [{
+                  value: 'score',
+                  label: '评分'
+                }, {
+                  value: 'views',
+                  label: '浏览量'
+                }, {
+                  value: 'add_date',
+                  label: '创建时间'
+                }, {
+                  value: 'name',
+                  label: '电影名称'
+                }],
+                sort_key: '',
+                search_words:'',
+                showPagination:true,
+                sw:''
             },
             methods: {
+                smForAdd:function () {
+                    this.$http.get('/search_movies',{params:{search_words:this.sw}}).then(function (data) {
+                        this.movies_not_from_category = data.body
+                    })
+                },
+                deleteMovie:function (id) {
+                    this.$http.get('/del_movie',{params:{id:id}}).then(function (data) {
+                        if (data.body === 'success') {
+                            this.$message({
+                                message:'删除成功！',
+                                type:'success'
+                            });
+                            this.getPageMovies()
+                        } else {
+                            this.$message.error('删除失败，请联系管理员')
+                        }
+                    })
+                },
                 goToMovieDetails:function (id) {
                   window.location.href = '/movie_details_page/' + id
                 },
@@ -231,9 +305,9 @@
                         if (data.body === 'success') {
                             this.add_movies.state = false;
                             this.getMoviesOnCat(this.manage_category.id);
-                            this.add_movies = []
+
+                            this.add_movies.movies = []
                         }
-                    }, function (response) {
                     })
                 },
                 addMovie2Cat:function () {
@@ -260,7 +334,12 @@
                     }, {emulateJSON: true}).then(function (data) {
                         if (data.body === 'success') {
                             this.new_movie.state = false;
-                            this.activeName = 'movie'
+                            this.new_movie.name = '';
+                            this.new_movie.director = '';
+                            this.new_movie.actor = '';
+                            this.new_movie.genre = '';
+                            this.getPageMovies();
+                            this.getMoviesCount();
                         }
                     }, function (response) {
                     })
@@ -313,8 +392,16 @@
                     }).then(function (data) {
                         this.msg = data.body;
                         if (this.msg === 'success') {
-                            this.getAllNews();
+                            this.getAllCategory();
+                            this.activeName = 'category';
 
+                            this.$message({
+                                message:'删除成功',
+                                type:'success'
+                            });
+
+                        } else {
+                            this.$message.error('删除失败，请联系管理员')
                         }
                     }, function (response) {
                         console.info(response);
@@ -332,6 +419,17 @@
                         console.info(response);
                     })
                 },
+                sortMovieByKey:function(key){
+                    this.page_movies.curr_page = 1;
+                    this.getPageMovies()
+                },
+                searchMovies:function(){
+                    if (this.search_words.length === 0) {
+                        return
+                    }
+                  this.getPageMovies();
+                  this.showPagination = false
+                },
                 getAllMovies: function () {
                     this.$http.get('/movies').then(function (data) {
                         this.movies = data.body;
@@ -341,11 +439,17 @@
 
                 },
                 getPageMovies: function () {
-                    this.$http.get('/page_movies',{params:{curr_page:this.page_movies.curr_page}}).then(function (data) {
+                    if (this.search_words.length === 0) {
+                        this.search_words = '_none'
+                    }
+                    this.showPagination = true;
+                    this.$http.get('/page_movies',{params:
+                            {curr_page:this.page_movies.curr_page,
+                             sort_key:this.sort_key,
+                             search_words:this.search_words}}).then(function (data) {
                         this.page_movies.movies = data.body;
-                    }, function (response) {
-                        console.info(response);
-                    })
+                    });
+                    this.search_words = ''
 
                 },
                 pageChange:function () {
@@ -357,6 +461,32 @@
                     }, function (response) {
                     })
 
+                },
+                updateCategory:function () {
+                    if (this.update_category.name.length === 0) {
+                        this.update_category.name = this.manage_category.category
+                    }
+                    if (this.update_category.desc.length === 0) {
+                        this.update_category.desc = this.manage_category.desc
+                    }
+                    this.$http.post('/update_category', {
+                        id:this.manage_category.id,
+                        name: this.update_category.name,
+                        desc: this.update_category.desc
+                    }, {emulateJSON: true}).then(function (data) {
+                        if (data.body === 'success') {
+                            this.$message({
+                                message:'更新成功',
+                                type:'success'
+                            });
+                            this.update_category.show = false;
+                            this.activeName = 'category'
+
+                        }
+                        this.update_category.name = '';
+                        this.update_category.desc='';
+                        this.getAllCategory()
+                    })
                 }
 
             },
@@ -367,7 +497,7 @@
 
             }
         })
-    </script>
-</html>
+</script>
+{% endblock %}
 
 

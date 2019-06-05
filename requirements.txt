@@ -9,3 +9,4 @@ xlrd
 flask-wtf
 werkzeug
 flask-login
+gunicorn
