@@ -1,47 +1,52 @@
+import datetime
 import json
 import os
 from functools import wraps
 
-from flask import (jsonify, redirect, render_template,
-                   request, send_file, url_for, abort)
-from flask_login import (LoginManager, current_user, login_required,
-                         login_user, logout_user)
+from flask import (
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    url_for,
+    abort)
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user)
 from sqlalchemy import func
 from werkzeug.utils import secure_filename
+
 import models
 from apriori import apriori
+from config import *
 from settings import app, db
-import datetime
-
-VIDEO_SAVE_PATH = 'video/'
-PAGE_SIZE = 50
-COMMENT_PAGE_SIZE = 20
-MODEL_PATH = 'support-0.1-confidence-0.7.pkl'
 
 ACCESS_IP = {}
-# use login manager to manage session
 login_manager = LoginManager()
-# login_manager.session_protection = 'strong'
 login_manager.login_view = 'login'
 login_manager.init_app(app=app)
 
 
 @login_manager.user_loader
-def load_user(id):
+def load_user(_id):
     try:
-        return models.User.query.get(int(id))
+        return models.User.query.get(int(_id))
     except:
         return None
 
 
 def admin_required():
-    def decorator(func):
-        @wraps(func)
+    def decorator(_func):
+        @wraps(_func)
         def decorated_function(*args, **kwargs):
             if not current_user.is_authenticated:
                 abort(401)
             if current_user.is_admin:
-                return func(*args, **kwargs)
+                return _func(*args, **kwargs)
             else:
                 abort(403)
 
@@ -57,7 +62,7 @@ def login():
         password = request.form['password']
         user = models.User.query.filter(models.User.account == account).first()
         if user is not None:
-            if user.is_freeze == True:
+            if user.is_freeze:
                 return jsonify('账号被冻结，请联系管理员解封')
             if user.verify_password(password):
                 # user = models.User(account)
@@ -70,7 +75,6 @@ def login():
     return render_template('login.html')
 
 
-# 注册
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -96,7 +100,6 @@ def main():
         'movieIndex.html')
 
 
-# ...
 @app.route('/logout')
 @login_required
 def logout():
@@ -165,9 +168,9 @@ def get_all_news():
     return jsonify(res)
 
 
-@app.route('/news/<id>', methods=['GET'])
-def get_news(id):
-    i = models.News.get(id)
+@app.route('/news/<_id>', methods=['GET'])
+def get_news(_id):
+    i = models.News.get(_id)
     return jsonify(
         {'title': i.title, 'content': i.content, 'id': i.id, 'pub_date': str(i.pub_date), 'username': i.user.username})
 
@@ -190,8 +193,8 @@ def delete_user():
 @app.route('/freeze_user')
 @admin_required()
 def freeze_user():
-    id = request.args.get('id')
-    u = models.User.query.get(id)
+    _id = request.args.get('id')
+    u = models.User.query.get(_id)
 
     if u is None:
         return 'user_not_exists'
@@ -203,8 +206,8 @@ def freeze_user():
 @app.route('/release_freeze')
 @admin_required()
 def release_freeze():
-    id = request.args.get('id')
-    u = models.User.query.get(id)
+    _id = request.args.get('id')
+    u = models.User.query.get(_id)
 
     if u is None:
         return 'success'
@@ -230,8 +233,8 @@ def publish_news():
 @app.route('/del_news', methods=['GET'])
 @admin_required()
 def delete_news():
-    id = request.args.get('id')
-    if id is None:
+    _id = request.args.get('id')
+    if _id is None:
         return 'id is empty'
 
     n = models.News.query.get(id)
@@ -244,7 +247,6 @@ def delete_news():
 def get_all_movies():
     movies = models.Movie.query.all()
     res = []
-    count = models.Movie.query.count()
     for m in movies:
         res.append({
             'name': m.name,
@@ -261,12 +263,12 @@ def get_all_movies():
 @admin_required()
 def update_movie():
     name = request.form['name']
-    id = request.form['id']
+    _id = request.form['id']
     actor = request.form['actor']
     director = request.form['director']
     genre = request.form['genre']
 
-    movie = models.Movie.query.get(int(id))
+    movie = models.Movie.query.get(int(_id))
     if movie is None:
         return jsonify('success')
 
@@ -516,11 +518,11 @@ def del_movie_from_category():
 @app.route('/update_category', methods=['POST'])
 @admin_required()
 def update_category():
-    id = request.form['id']
+    _id = request.form['id']
     name = request.form['name']
     desc = request.form['desc']
 
-    c = models.MovieCategory.query.get(int(id))
+    c = models.MovieCategory.query.get(int(_id))
     if c is None:
         return jsonify('error')
     c.category = name
@@ -532,9 +534,9 @@ def update_category():
 @app.route('/del_category')
 @admin_required()
 def delete_category():
-    id = request.args.get('id')
+    _id = request.args.get('id')
 
-    c = models.MovieCategory.query.get(int(id))
+    c = models.MovieCategory.query.get(int(_id))
 
     if c is None:
         return jsonify('error')
@@ -759,10 +761,10 @@ def get_all_my_collections():
 @app.route('/del_collection')
 @admin_required()
 def del_collection():
-    id = request.args.get('id')
+    _id = request.args.get('id')
     if id is None:
         return 'error'
-    c = models.UserCollection.query.get(int(id))
+    c = models.UserCollection.query.get(int(_id))
     if c is None:
         return 'success'
     db.session.delete(c)
@@ -825,9 +827,9 @@ def upload_news_img():
     return res
 
 
-@app.route('/news_details/<id>')
-def nd(id):
-    news = models.News.query.get(int(id))
+@app.route('/news_details/<_id>')
+def nd(_id):
+    news = models.News.query.get(int(_id))
     return jsonify({
         'pub_date': str(news.pub_date),
         'title': news.title,
@@ -887,9 +889,9 @@ def uu_info():
     return jsonify('success')
 
 
-@app.route('/news_detail/<id>')
-def news_details(id):
-    news = models.News.query.get(int(id))
+@app.route('/news_detail/<_id>')
+def news_details(_id):
+    news = models.News.query.get(int(_id))
     return render_template('newsDetail.html', news=news)
 
 

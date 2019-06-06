@@ -1,7 +1,7 @@
+sqlalchemy
 flask-sqlalchemy
 flask-script
 xlutils
-gunicorn
 flask
 pandas
 pymysql
