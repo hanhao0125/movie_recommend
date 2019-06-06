@@ -85,7 +85,7 @@ ul, ol {
             </span></p>
     </el-row>
     <div  id="news-content">
-        <div v-html="news.content">
+        <div v-html="content">
     </div>
 </div>
 </div>
@@ -103,7 +103,7 @@ ul, ol {
 
             methods: {
                 getNewsDetails: function () {
-                    this.$http.get('/news_details/' + {{ news.id }}).then(function (data) {
+                    this.$http.get('/news/' + {{ news.id }}).then(function (data) {
                         this.news = data.body;
                     }, function (response) {
                         console.info(response);

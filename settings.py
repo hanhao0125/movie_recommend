@@ -1,10 +1,13 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask
+from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config.from_object('config')
+
 db = SQLAlchemy(app)
 app.jinja_env.variable_start_string = '{{ '
 app.jinja_env.variable_end_string = ' }}'
-
-abs_path = '/Users/hanhao/PycharmProjects/apr_movie/apriori/'
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app=app)

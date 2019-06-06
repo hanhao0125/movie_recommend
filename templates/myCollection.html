@@ -46,7 +46,7 @@
 {% endblock %}
 {% block vue %}
 <script>
-    app.activeIndex = 'myCollection';
+    app.activeIndex = 'm/myCollection';
     new Vue({
         el: '#myCollection',
         data: {
@@ -55,16 +55,16 @@
         },
         methods: {
             getMyCollections:function() {
-            this.$http.get('/personal_collect').then(function (data) {
+            this.$http.get('/m/personal_collect').then(function (data) {
                 this.collections = data.body;
                 this.c_len  = this.collections.length
             })
             },
             goToMovieDetails:function (id) {
-              window.location.href = '/movie_details_page/' + id
+              window.location.href = '/m/movie_details_page/' + id
             },
             delCollection: function (id) {
-                this.$http.get('/del_collection',{params:{id:id}}).then(function (data) {
+                this.$http.get('/m/del_collection',{params:{id:id}}).then(function (data) {
                     if (data.body === 'success') {
                         this.$message({
                             message:'删除成功',

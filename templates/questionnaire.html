@@ -61,7 +61,7 @@
 {% endblock %}
 {% block vue %}
 <script>
-    app.activeIndex = 'questionnaire';
+    app.activeIndex = 'f/qa';
     new Vue({
         el: '#questionnaire',
         data: {
@@ -75,7 +75,7 @@
         methods: {
             onSubmit:function(){
 
-                this.$http.post('/submit_qa', {
+                this.$http.post('/f/questionnaire', {
                     sex: this.form.sex,
                     favorite_genre: this.form.favorite_genre,
                     score: this.form.site_score,

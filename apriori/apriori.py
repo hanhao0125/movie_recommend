@@ -6,7 +6,7 @@ from settings import db
 import pickle
 import numpy as np
 import models
-from settings import abs_path
+from config import abs_path
 
 
 def get_data():

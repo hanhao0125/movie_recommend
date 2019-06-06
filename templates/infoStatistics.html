@@ -89,7 +89,7 @@
 
     <script src="//unpkg.com/v-charts/lib/index.min.js"></script>
     <script>
-        app.activeIndex = 'infoStatistics';
+        app.activeIndex = 'f/infoStatistics';
         v = new Vue({
             el: '#st',
             data: {
@@ -122,7 +122,7 @@
         },
         methods: {
             getStatistics:function () {
-                this.$http.get('/statistics').then(function (data) {
+                this.$http.get('/f/statistics').then(function (data) {
                         this.st = data.body;
                         res = [];
                         for (let i in this.st['from_where']) {
@@ -161,7 +161,7 @@
             }
         ,
             getAllQa: function () {
-                this.$http.get('/qa', {}).then(function (data) {
+                this.$http.get('/f/questionnaire', {}).then(function (data) {
                         this.qa = data.body
                     }
                 )

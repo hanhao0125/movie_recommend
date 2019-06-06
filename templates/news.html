@@ -99,13 +99,13 @@
 
             methods: {
                 goToNews:function (id) {
-                  window.location.href = '/news_detail/' + id
+                  window.location.href = '/f/news/' + id
                 },
                 editNews:function () {
                     this.edit_news = true
                 },
                 delNews:function (id) {
-                    this.$http.get('/del_news', {
+                    this.$http.get('/b/del_news', {
                         params:{id:id}
                     }).then(function (data) {
                         this.msg = data.body;
@@ -124,7 +124,7 @@
                     })
                 },
                 pubNews: function () {
-                    this.$http.post('/pub_news', {
+                    this.$http.post('/b/pub_news', {
                         title: this.pub_new.title,
                         content: this.pub_new.content
                     }, {emulateJSON: true}).then(function (data) {
@@ -140,7 +140,7 @@
                     })
                 },
                 getAllNews: function () {
-                    this.$http.get('/news').then(function (data) {
+                    this.$http.get('/f/news').then(function (data) {
                         this.news = data.body;
                     }, function (response) {
                         console.info(response);

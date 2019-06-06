@@ -88,7 +88,7 @@
 {% endblock %}
 {% block vue %}
 <script>
-    app.activeIndex= 'userManage';
+    app.activeIndex= 'b/userManage';
     new Vue({
             el: '#userManage',
             data: {
@@ -106,7 +106,7 @@
 
             methods: {
                 releaseFreeze:function (id) {
-                this.$http.get('/release_freeze', {
+                this.$http.get('/b/release_freeze', {
                     params:{id:id}
                 }).then(function (data) {
                     this.msg = data.body;
@@ -124,7 +124,7 @@
                 })
                 },
                 giveAdmin:function (id) {
-                this.$http.get('/give_admin', {
+                this.$http.get('/b/give_admin', {
                     params:{id:id}
                 }).then(function (data) {
                     this.msg = data.body;
@@ -146,7 +146,7 @@
               this.update_user.phone = user.phone
             },
             updateUserInfo:function () {
-                this.$http.post('/update_user', {
+                this.$http.post('/b/update_user', {
                     email: this.update_user.email,
                     phone:this.update_user.phone,
                     username:this.update_user.username,
@@ -164,7 +164,7 @@
                 })
             },
             freezeUser:function (row) {
-            this.$http.get('/freeze_user',{params:{id:row.id}}).then(function (data) {
+            this.$http.get('/b/freeze_user',{params:{id:row.id}}).then(function (data) {
                 if (data.body === 'success') {
                     this.$message({
                                 message: ' 冻结成功！',
@@ -180,7 +180,7 @@
             },
             getPageUsers: function () {
             this.curr_page += 1;
-            this.$http.get('/users',{params:{'curr_page':this.curr_page}}).then(function (data) {
+            this.$http.get('/b/users',{params:{'curr_page':this.curr_page}}).then(function (data) {
                 this.users = this.users.concat(data.body);
             })}
             },

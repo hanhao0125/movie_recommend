@@ -37,14 +37,14 @@
             },
             methods: {
                 register: function () {
-                    this.$http.post('/register', {
+                    this.$http.post('/u/register', {
                         account: this.form.account,
                         password: this.form.password
 
                     }, {emulateJSON: true}).then(function (data) {
                         this.msg = data.body;
                         if(this.msg === 'success') {
-                            window.location.href='/login'
+                            window.location.href='/u/login'
                         } else {
                             this.$message.error(this.msg);
                         }

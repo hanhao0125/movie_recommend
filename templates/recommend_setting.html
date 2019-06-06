@@ -109,7 +109,7 @@
 {% endblock %}
 {% block vue %}
 <script>
-    app.activeIndex= 'recommendSetting';
+    app.activeIndex= 'b/recommendSetting';
 
     new Vue({
             el: '#re',
@@ -145,7 +145,7 @@
                       spinner: 'el-icon-loading',
                       background: 'rgba(0, 0, 0, 0.7)'
                     });
-                    this.$http.get('/training_apriori',{params:{support:this.support,confidence:this.confidence}}).then(function (data) {
+                    this.$http.get('/b/training_apriori',{params:{support:this.support,confidence:this.confidence}}).then(function (data) {
                         data = data.body;
                         if (data.message === 'success') {
                             this.$message({

@@ -59,7 +59,7 @@
     <div style="text-align: center;margin-top: 30px;overflow: auto">
 
     <div v-for="m in page_movies.movies">
-        <a :href="'/movie_details_page/' + m.id" class="item">
+        <a :href="'/m/movie_details_page/' + m.id" class="item">
             <img :src="m.img_path" :alt="m.name">
             <p>{{m.name}}  <strong style="color:#e09015 ">{{m.score.toFixed(1)}}</strong></p>
         </a>
@@ -99,7 +99,7 @@
 {% endblock %}
 {% block vue %}
 <script>
-    app.activeIndex= 'movieIndex';
+    app.activeIndex= 'm/movieIndex';
     new Vue({
             el: '#movieIndex',
             data: {
@@ -136,7 +136,7 @@
 
             methods: {
                 submitCollection:function() {
-                    this.$http.post('/collect_movie', {
+                    this.$http.post('/m/collect_movie', {
                         movie_id: this.collect_id,
                         mark: this.collect_mark
                     }, {emulateJSON: true}).then(function (data) {
@@ -164,10 +164,10 @@
                     this.getPageMovies()
                 },
                 goToMovieDetails:function (id) {
-                  window.location.href = '/movie_details_page/' + id
+                  window.location.href = '/m/movie_details_page/' + id
                 },
                 getAllMovies: function () {
-                    this.$http.get('/movies').then(function (data) {
+                    this.$http.get('/m/movies').then(function (data) {
                         this.movies = data.body;
                     }, function (response) {
                         console.info(response);
@@ -179,7 +179,7 @@
                     if (this.search_words.length === 0) {
                         this.search_words = '_none'
                     }
-                    this.$http.get('/page_movies',{params:
+                    this.$http.get('/m/page_movies',{params:
                             {curr_page:this.page_movies.curr_page,
                              sort_key:this.sort_key,
                              search_words:this.search_words}}).then(function (data) {
@@ -194,7 +194,7 @@
                     document.documentElement.scrollTop = 0
                 },
                 getMoviesCount: function () {
-                    this.$http.get('/movies_count').then(function (data) {
+                    this.$http.get('/m/movies_count').then(function (data) {
                         this.movies_count = data.body;
                         this.showPagination = true
                     })

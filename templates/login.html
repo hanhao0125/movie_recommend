@@ -65,7 +65,7 @@
         },
         methods: {
             login: function () {
-                this.$http.post('/login', {
+                this.$http.post('/u/login', {
                     account: this.form.account,
                     password: this.form.password
 
@@ -81,7 +81,7 @@
                 })
             },
             register: function () {
-                window.location.href = '/register'
+                window.location.href = '/u/register'
             }
         }
     })

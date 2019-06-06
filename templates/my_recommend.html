@@ -41,7 +41,7 @@
 <div style="text-align: center;margin-top: 30px;overflow: auto">
 
     <div v-for="m in movies">
-        <a :href="'/movie_details_page/' + m.id" class="item">
+        <a :href="'/m/movie_details_page/' + m.id" class="item">
             <img :src="m.img_path" :alt="m.name">
             <p>{{m.name}}  <strong style="color:#e09015 ">{{m.score.toFixed(1)}}</strong></p>
         </a>
@@ -51,7 +51,7 @@
 {% endblock %}
 {% block vue %}
 <script>
-    app.activeIndex = 'myRecommend';
+    app.activeIndex = 'm/myRecommend';
     new Vue({
         el: '#myRecommend',
         data: {
@@ -60,16 +60,16 @@
         },
         methods: {
             getMyRecommends:function() {
-            this.$http.get('/recommend_movies').then(function (data) {
+            this.$http.get('/m/recommend_movies').then(function (data) {
                 this.movies = data.body;
                 this.m_len  = this.movies.length
             })
             },
             goToMovieDetails:function (id) {
-              window.location.href = '/movie_details_page/' + id
+              window.location.href = '/m/movie_details_page/' + id
             },
             delCollection: function (id) {
-                this.$http.get('/del_collection',{params:{id:id}}).then(function (data) {
+                this.$http.get('/m/del_collection',{params:{id:id}}).then(function (data) {
                     if (data.body === 'success') {
                         this.$message({
                             message:'删除成功',

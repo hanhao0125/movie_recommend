@@ -210,7 +210,7 @@
 {% endblock %}
 {% block vue %}
 <script>
-    app.activeIndex = 'movieManage';
+    app.activeIndex = 'b/movieManage';
     new Vue({
             el: '#movieManage',
 
@@ -277,12 +277,12 @@
             },
             methods: {
                 smForAdd:function () {
-                    this.$http.get('/search_movies',{params:{search_words:this.sw}}).then(function (data) {
+                    this.$http.get('/m/search_movies',{params:{search_words:this.sw}}).then(function (data) {
                         this.movies_not_from_category = data.body
                     })
                 },
                 deleteMovie:function (id) {
-                    this.$http.get('/del_movie',{params:{id:id}}).then(function (data) {
+                    this.$http.get('/b/del_movie',{params:{id:id}}).then(function (data) {
                         if (data.body === 'success') {
                             this.$message({
                                 message:'删除成功！',
@@ -295,10 +295,10 @@
                     })
                 },
                 goToMovieDetails:function (id) {
-                  window.location.href = '/movie_details_page/' + id
+                  window.location.href = '/m/movie_details_page/' + id
                 },
                 post2DB:function () {
-                    this.$http.post('/add_movie_to_category', {
+                    this.$http.post('/b/add_movie_to_category', {
                         ids:JSON.stringify(this.add_movies.movies),
                         category_id:this.manage_category.id
                     }, {emulateJSON: true}).then(function (data) {
@@ -319,14 +319,14 @@
                   this.movies_not_from_category.splice(scope.$index,1);
                 },
                 getMoviesNotFromCat:function () {
-                    this.$http.get('/movies_not_from_category',{params:{id:this.manage_category.id}}).then(function (data) {
+                    this.$http.get('/b/movies_not_from_category',{params:{id:this.manage_category.id}}).then(function (data) {
                         this.movies_not_from_category = data.body;
                     }, function (response) {
 
                     })
                 },
                 addNewMovie:function () {
-                    this.$http.post('/add_movie', {
+                    this.$http.post('/b/add_movie', {
                         name: this.new_movie.name,
                         director:this.new_movie.director,
                         actor:this.new_movie.actor,
@@ -345,7 +345,7 @@
                     })
                 },
                 delMovieFromCat:function (id) {
-                     this.$http.post('/del_movie_from_category', {
+                     this.$http.post('/b/del_movie_from_category', {
                         id:id
                     }, {emulateJSON: true}).then(function (data) {
                         if (data.body === 'success') {
@@ -373,21 +373,21 @@
                   this.activeName = 'manage'
                 },
                 getMoviesOnCat:function (id) {
-                    this.$http.get('/movies_from_category',{params:{id:id}}).then(function (data) {
+                    this.$http.get('/b/movies_from_category',{params:{id:id}}).then(function (data) {
                         this.movies_from_category = data.body;
                     }, function (response) {
                         console.info(response);
                     })
                 },
                 getAllCategory:function () {
-                    this.$http.get('/movie_category').then(function (data) {
+                    this.$http.get('/b/movie_category').then(function (data) {
                         this.movie_category = data.body;
                     }, function (response) {
                         console.info(response);
                     })
                 },
                 delCategory:function (id) {
-                    this.$http.get('/del_category', {
+                    this.$http.get('/b/del_category', {
                         params:{id:id}
                     }).then(function (data) {
                         this.msg = data.body;
@@ -408,7 +408,7 @@
                     })
                 },
                 createCategory:function () {
-                    this.$http.post('/create_category', {
+                    this.$http.post('/b/create_category', {
                         category: this.new_category.category,
                         desc: this.new_category.desc
                     }, {emulateJSON: true}).then(function (data) {
@@ -431,7 +431,7 @@
                   this.showPagination = false
                 },
                 getAllMovies: function () {
-                    this.$http.get('/movies').then(function (data) {
+                    this.$http.get('/m/movies').then(function (data) {
                         this.movies = data.body;
                     }, function (response) {
                         console.info(response);
@@ -443,7 +443,7 @@
                         this.search_words = '_none'
                     }
                     this.showPagination = true;
-                    this.$http.get('/page_movies',{params:
+                    this.$http.get('/m/page_movies',{params:
                             {curr_page:this.page_movies.curr_page,
                              sort_key:this.sort_key,
                              search_words:this.search_words}}).then(function (data) {
@@ -456,7 +456,7 @@
                     this.getPageMovies()
                 },
                 getMoviesCount: function () {
-                    this.$http.get('/movies_count').then(function (data) {
+                    this.$http.get('/m/movies_count').then(function (data) {
                         this.movies_count = data.body;
                     }, function (response) {
                     })
@@ -469,7 +469,7 @@
                     if (this.update_category.desc.length === 0) {
                         this.update_category.desc = this.manage_category.desc
                     }
-                    this.$http.post('/update_category', {
+                    this.$http.post('/b/update_category', {
                         id:this.manage_category.id,
                         name: this.update_category.name,
                         desc: this.update_category.desc
