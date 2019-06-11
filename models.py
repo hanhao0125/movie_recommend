@@ -83,9 +83,7 @@ class News(db.Model):
     pub_date = db.Column(db.DateTime)
     content = db.Column(db.String(4000))
     title = db.Column(db.String(120))
-
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User', backref=db.backref('users', lazy='dynamic'))
+    user_id = db.Column(db.Integer)
 
     def __init__(self, title, content, pub_date=None):
         self.title = title
@@ -103,10 +101,8 @@ class MovieEva(db.Model):
     comment = db.Column(db.String(120))
     score = db.Column(db.Float)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'))
-    movie = db.relationship('Movie', backref=db.backref('movies', lazy='dynamic'))
-    user = db.relationship('User', backref=db.backref('eva_user', lazy='dynamic'))
+    user_id = db.Column(db.Integer)
+    movie_id = db.Column(db.Integer)
 
     def __init__(self, comment, eva_date=None):
         self.comment = comment
@@ -137,9 +133,7 @@ class GuestBook(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     pub_date = db.Column(db.DateTime)
     content = db.Column(db.String(400))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    user = db.relationship('User', backref=db.backref('g_users', lazy='dynamic'))
+    user_id = db.Column(db.Integer)
 
     def __init__(self, content, pub_date=None):
         self.content = content
@@ -152,11 +146,8 @@ class GuestBook(db.Model):
 
 class MovieCatRe(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'))
-    movie_cat_id = db.Column(db.Integer, db.ForeignKey('movie_category.id'))
-
-    movie = db.relationship('Movie', backref='movie_cat_re')
-    movie_category = db.relationship('MovieCategory', backref='movie_cat_re')
+    movie_id = db.Column(db.Integer)
+    movie_cat_id = db.Column(db.Integer)
 
     def __init__(self, movie_id, movie_cat_id):
         self.movie_id = movie_id
@@ -168,12 +159,10 @@ class MovieCatRe(db.Model):
 
 class UserCollection(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'))
+    user_id = db.Column(db.Integer)
+    movie_id = db.Column(db.Integer)
     mark = db.Column(db.String(300))
     collect_date = db.Column(db.DateTime)
-    movie = db.relationship('Movie', backref='user_collection')
-    user = db.relationship('User', backref='user_collection')
 
     def __init__(self, movie_id, user_id):
         self.movie_id = movie_id
@@ -192,7 +181,7 @@ class Qa(db.Model):
     from_where = db.Column(db.String(10))
     suggest = db.Column(db.String(300))
     submit_date = db.Column(db.DateTime)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer)
 
     def __init__(self, sex, favorite_genre, score, from_where, suggest):
         self.sex = sex
@@ -363,6 +352,6 @@ def import_user_collection():
 if __name__ == '__main__':
     # import_user2()
     # import_movie2()
-    update_movie_eva()
-
-    # import_user_collection()
+    # update_movie_eva()
+    init_db()
+    # pass
