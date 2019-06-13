@@ -3,7 +3,7 @@ from flask import jsonify, render_template, request
 from flask_login import current_user, login_required
 from sqlalchemy import func
 
-from models import GuestBook, MovieEva, Movie, User, Qa, News
+from models import GuestBook, Rating, Movie, User, Qa, News
 from settings import db
 
 f = Blueprint('features', __name__, template_folder='templates')
@@ -83,7 +83,7 @@ def st_page():
 def get_statistics():
     movie_count = Movie.query.count()
     user_count = User.query.count()
-    eva_count = MovieEva.query.count()
+    eva_count = Rating.query.count()
     qa_count = Qa.query.count()
     guest_count = GuestBook.query.count()
     score = db.session.query(func.avg(Qa.score).label('average')).first()[0]

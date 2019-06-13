@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 
 from apriori import apriori
 from config import PAGE_SIZE, COMMENT_PAGE_SIZE, MODEL_PATH
-from models import Movie, MovieEva, UserCollection
+from models import Movie, Rating, UserCollection
 from settings import db
 from sqlalchemy import func
 
@@ -154,8 +154,8 @@ def get_all_movie_comments():
     movie_id = request.args.get('movie_id')
     curr_page = int(request.args.get('curr_page'))
     curr_page = 1 if curr_page is None else curr_page
-    comments = MovieEva.query.order_by(db.desc(MovieEva.eva_date)).filter(
-        MovieEva.movie_id == movie_id).limit(COMMENT_PAGE_SIZE).offset(
+    comments = Rating.query.order_by(db.desc(Rating.eva_date)).filter(
+        Rating.movie_id == movie_id).limit(COMMENT_PAGE_SIZE).offset(
         (curr_page - 1) * COMMENT_PAGE_SIZE)
 
     res = [{
@@ -203,7 +203,7 @@ def add_new_comments():
 
     curr_user_id = current_user.id
 
-    me = MovieEva(comment)
+    me = Rating(comment)
     me.score = score
     me.movie_id = movie_id
     me.user_id = curr_user_id
@@ -211,8 +211,8 @@ def add_new_comments():
     db.session.add(me)
     db.session.commit()
     # 更新 movie 表中的平均得分
-    avg_score = db.session.query(func.avg(MovieEva.score)
-                                 .label('average')).filter(MovieEva.movie_id == movie_id).first()[0]
+    avg_score = db.session.query(func.avg(Rating.score)
+                                 .label('average')).filter(Rating.movie_id == movie_id).first()[0]
     movie = Movie.query.get(movie_id)
     if movie is not None:
         movie.score = avg_score

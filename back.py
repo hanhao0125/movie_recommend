@@ -177,7 +177,7 @@ def del_movie():
     try:
         # 删除电影，同时删除电影之下的评论，收藏下的电影，movie_cat_re,movie_eva,user_collection
         # 删除评论
-        evas = models.MovieEva.query.filter(models.MovieEva.movie_id == id).all()
+        evas = models.Rating.query.filter(models.Rating.movie_id == id).all()
         for i in evas:
             db.session.delete(i)
         # 删除包含该分类的电影

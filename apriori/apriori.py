@@ -102,7 +102,7 @@ def recommend_by_user_id(user_id, model_path='support-0.1-confidence-0.7.pkl'):
     user = models.User.query.get(int(user_id))
     if user is None:
         return False
-    fav_movies = models.MovieEva.query.filter(models.MovieEva.user_id == user_id).all()
+    fav_movies = models.Rating.query.filter(models.Rating.user_id == user_id).all()
     print(fav_movies)
     movie_id = [m.movie_id for m in fav_movies if m.score >= 5]
     all_movie_id = set([m.movie_id for m in fav_movies])
