@@ -9,7 +9,7 @@ from flask import render_template
 @app.route('/')
 @app.route('/main')
 def e():
-    return render_template('movieIndex.html')
+    return render_template('movie/movieIndex.html')
 
 
 if __name__ == '__main__':

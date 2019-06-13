@@ -279,6 +279,15 @@ def update_movie_score():
     db.session.commit()
 
 
+def update_movie_rating_num():
+    movies = Movie.query.all()
+    for m in tqdm.tqdm(movies):
+        rating_nums = db.session.query(func.count(Rating.rating)
+                                       .label('sum')).filter(Rating.movie_id == m.id).first()[0]
+        m.rating_nums = rating_nums
+    db.session.commit()
+
+
 def update_movie_num():
     movies = Movie.query.all()
     for m in movies:
@@ -291,4 +300,4 @@ def update_movie_num():
 
 if __name__ == '__main__':
     # generate_comments_to_rating()
-    update_movie_score()
+    update_movie_rating_num()

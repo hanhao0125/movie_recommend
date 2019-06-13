@@ -1,5 +1,6 @@
 SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:@localhost/mv'
-SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+SQLALCHEMY_COMMIT_ON_TEARDOWN = False
+REDIS_URL = "redis://:123456@127.0.0.1:6379/0"
 
 CSRF_ENABLED = True
 SECRET_KEY = 'you-will-never-guess'
@@ -11,3 +12,5 @@ PAGE_SIZE = 50
 COMMENT_PAGE_SIZE = 20
 MODEL_PATH = 'support-0.1-confidence-0.7.pkl'
 abs_path = '/Users/hanhao/PycharmProjects/apr_movie/apriori/'
+APRIORI_MODEL_PATH = '/Users/hanhao/PycharmProjects/apr_movie/apriori/support-0.1-confidence-0.7.pkl'
+MAX_CACHE_VIEW_NUM = 5

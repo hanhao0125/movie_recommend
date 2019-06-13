@@ -56,13 +56,13 @@
     <img :src="movie.img_path" :alt="movie.name">
 
     <div style="float: left">
-        <span class="pl">导演：<span class="attr">{{movie.director}}</span></span>
-        <span class="pl">演员：<span class="attr">{{movie.actor}}</span></span>
-        <span class="pl"> 类型：<span>{{movie.genre}}</span></span>
-        <span class="pl">评分：<span class="score">{{movie.score}}</span></span>
-        <span class="pl">浏览次数：{{movie.views}}</span>
-        <span class="pl">收藏次数：{{movie.collect_num}}</span>
-        <span class="pl">评价次数：{{movie.eva_num}}</span>
+        <span class="pl">导演：<span class="attr">{{ movie.director }}</span></span>
+        <span class="pl">演员：<span class="attr">{{ movie.actors }}</span></span>
+        <span class="pl"> 类型：<span>{{ movie.genres }}</span></span>
+        <span class="pl">评分：<span class="score">{{ movie.score }}</span></span>
+        <span class="pl">浏览次数：{{ movie.view_nums }}</span>
+        <span class="pl">收藏次数：{{ movie.collect_nums }}</span>
+        <span class="pl">评价次数：{{ movie.rating_nums }}</span>
     </div>
     {% if current_user.is_admin == true %}
     <el-upload :action="'/update_movie_front/' + movie.id" multiple

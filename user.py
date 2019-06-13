@@ -22,7 +22,7 @@ def login():
                 return jsonify('密码不正确！')
         else:
             return jsonify('账号不存在')
-    return render_template('login.html')
+    return render_template('user/login.html')
 
 
 @u.route('/register', methods=['GET', 'POST'])
@@ -40,7 +40,7 @@ def register():
             db.session.commit()
         return jsonify('success')
     else:
-        return render_template('register.html')
+        return render_template('user/register.html')
 
 
 @u.route('/logout')
@@ -52,7 +52,7 @@ def logout():
 
 @u.route('/user_info')
 def user_info():
-    return render_template('userInfo.html')
+    return render_template('user/userInfo.html')
 
 
 @u.route('/update_user_info', methods=['POST'])

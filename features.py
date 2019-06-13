@@ -11,7 +11,7 @@ f = Blueprint('features', __name__, template_folder='templates')
 
 @f.route('/gb')
 def guest_page():
-    return render_template('guestBook.html')
+    return render_template('feature/guestBook.html')
 
 
 @f.route('/guestbook')
@@ -43,7 +43,7 @@ def leave_message():
 @f.route('/qa')
 @login_required
 def questionnaire_page():
-    return render_template('questionnaire.html')
+    return render_template('feature/questionnaire.html')
 
 
 @f.route('/questionnaire', methods=['GET'])
@@ -76,7 +76,7 @@ def add_qa():
 
 @f.route('/st')
 def st_page():
-    return render_template('infoStatistics.html')
+    return render_template('feature/infoStatistics.html')
 
 
 @f.route('/statistics')
@@ -118,13 +118,13 @@ def get_statistics():
 #     })
 
 @f.route('nw')
-def news_page(): return render_template('news.html')
+def news_page(): return render_template('feature/news.html')
 
 
 @f.route('/news/<_id>')
 def news_details(_id):
     news = News.query.get(int(_id))
-    return render_template('newsDetail.html', news=news)
+    return render_template('feature/newsDetail.html', news=news)
 
 
 @f.route('/news', methods=['GET'])

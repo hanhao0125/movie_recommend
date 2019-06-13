@@ -2,17 +2,32 @@ import pandas as pd
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori
 from mlxtend.frequent_patterns import association_rules
-from settings import db
+from settings import db, apriori_model
 import pickle
 import numpy as np
 import models
+from boxx import timeit
 from config import abs_path
 
 
+class Apriori:
+    def __init__(self):
+        pass
+
+    def fit(self):
+        pass
+
+    def top_rules(self):
+        pass
+
+    def predict(self):
+        pass
+
+
 def get_data():
-    all_ratings = pd.read_sql('select * from movie_eva where score >= 3', db.engine)
-    records = [list(v.values) for k, v in all_ratings.groupby("user_id")["movie_id"]]
-    print(records)
+    all_ratings = pd.read_sql('select * from rating where movieId in (select id from movie where rating_nums > 200)',
+                              db.engine)
+    records = [list(v.values) for k, v in all_ratings.groupby("userId")["movieId"]]
     print(len(records))
     return records
 
@@ -33,21 +48,17 @@ def generate_rules(min_support=0.1, min_confidence=0.7, test=False):
     a = association_rules(frequent_itemsets, metric="confidence", min_threshold=min_confidence)
     save_path = ''.join([abs_path, 'support-', str(min_support), '-confidence-', str(min_confidence), '.pkl'])
     pickle.dump(a, open(save_path, 'wb'))
-    return save_path.split('\\')[-1]
+    return a
 
 
 # top 5
-def samples_of_rules(model_path='support-0.1-confidence-0.7.pkl', num=20):
-    model_path = abs_path + model_path
-    a = pickle.load(open(model_path, 'rb'))
-    a = a.sort_values('confidence', ascending=False)
+def samples_of_rules(model, num=20):
+    a = model.sort_values('confidence', ascending=False)
     res = []
 
     for i, row in a[:num].iterrows():
-        r = {}
-        r['antecedants'] = get_movie_name_by_id(row['antecedants'])
-        r['consequents'] = get_movie_name_by_id(row['consequents'])
-        r['confidence'] = row['confidence']
+        r = {'antecedents': get_movie_name_by_id(row['antecedents']),
+             'consequents': get_movie_name_by_id(row['consequents']), 'confidence': row['confidence']}
         res.append(r)
         print(r)
     return res, a.shape[0]
@@ -67,7 +78,7 @@ def test_confidence():
         print('for user %d' % j)
         print(t)
         for i, row in a.iterrows():
-            if row['antecedants'].issubset(t):
+            if row['antecedents'].issubset(t):
                 if _is_in(row['consequents'], t):
                     _true += 1
                 else:
@@ -94,28 +105,26 @@ def _is_in(a, b):
     return t / (t + f) >= 0.5
 
 
-# test_confidence()
-
-
-def recommend_by_user_id(user_id, model_path='support-0.1-confidence-0.7.pkl'):
-    model_path = abs_path + model_path
+def recommend_by_user_id(user_id):
     user = models.User.query.get(int(user_id))
     if user is None:
         return False
     fav_movies = models.Rating.query.filter(models.Rating.user_id == user_id).all()
-    print(fav_movies)
-    movie_id = [m.movie_id for m in fav_movies if m.score >= 5]
-    all_movie_id = set([m.movie_id for m in fav_movies])
-    print(len(all_movie_id))
-    a = pickle.load(open(model_path, 'rb'))
+
+    print(f' fav movies length: {len(fav_movies)}')
+
+    movie_id = [m.movie_id for m in fav_movies]
+    a = apriori_model
+
+    print(a.head())
     t = set(movie_id)
 
     recommend = set()
     for i, row in a.iterrows():
-        if row['antecedants'].issubset(t):
+        if row['antecedents'].issubset(t):
             recommend = recommend | row['consequents']
 
-    recommend -= all_movie_id
+    recommend -= t
     return get_movie_name_by_id(recommend)
 
 
@@ -135,6 +144,7 @@ def get_movie_name_by_id(movie_id):
     return res
 
 
-# recommend_by_user_id(111)
-# if __name__ == '__main__':
-#     samples_of_rules()
+if __name__ == '__main__':
+    with timeit():
+        generate_rules()
+

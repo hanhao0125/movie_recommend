@@ -1,23 +1,20 @@
-import datetime
-
-from flask import Blueprint
+from flask import Blueprint, current_app
 from flask import jsonify, render_template, request, send_file
 from flask_login import current_user, login_required
 
 from apriori import apriori
-from config import PAGE_SIZE, COMMENT_PAGE_SIZE, MODEL_PATH
+from config import PAGE_SIZE, COMMENT_PAGE_SIZE, MAX_CACHE_VIEW_NUM
 from models import Movie, Rating, UserCollection
-from settings import db
+from settings import db, redis_client
 from sqlalchemy import func
 
 m = Blueprint('movie', __name__, template_folder='templates')
-ACCESS_IP = {}
 
 
 @m.route('/')
 @m.route('/main')
 def main():
-    return render_template('movieIndex.html')
+    return render_template('movie/movieIndex.html')
 
 
 @m.route('/movies')
@@ -27,11 +24,11 @@ def get_all_movies():
     for movie in movies:
         res.append({
             'name': movie.name,
-            'genre': movie.genre,
-            'actor': movie.actor,
+            'genre': movie.genres,
+            'actor': movie.actors,
             'director': movie.director,
             'score': movie.score,
-            'views': movie.views
+            'views': movie.view_nums
         })
     return jsonify(res)
 
@@ -46,11 +43,11 @@ def get_movies_count():
 def get_page_movie():
     s = {
         'name': Movie.name,
-        'views': Movie.views,
+        'views': Movie.view_nums,
         'score': Movie.score,
         'add_date': Movie.add_date,
-        'id': Movie.id
-
+        'id': Movie.id,
+        'rating_nums': Movie.rating_nums
     }
     current_page = int(request.args.get('curr_page'))
     sort_key = request.args.get('sort_key')
@@ -69,11 +66,11 @@ def get_page_movie():
     res = [{
         'id': m.id,
         'name': m.name,
-        'genre': m.genre,
-        'actor': m.actor,
+        'genre': m.genres,
+        'actor': m.actors,
         'director': m.director,
         'score': m.score,
-        'views': m.views,
+        'views': m.view_nums,
         'video_path': m.video_path,
         'img_path': m.img_path
     } for m in movies]
@@ -88,34 +85,40 @@ def search_movies():
     movies = Movie.query.order_by(db.desc(Movie.name)) \
         .filter(Movie.name.like(''.join(['%', s, '%']))).all()
     res = [{
-        'id': m.id,
-        'name': m.name,
-        'genre': m.genre,
-        'actor': m.actor,
-        'director': m.director,
-        'score': str(m.score),
-        'views': str(m.views),
-        'video_path': m.video_path
-    } for m in movies]
+        'id': movie.id,
+        'name': movie.name,
+        'genre': movie.genres,
+        'actor': movie.actors,
+        'director': movie.director,
+        'score': str(movie.score),
+        'views': str(movie.view_nums),
+        'video_path': movie.video_path
+    } for movie in movies]
     return jsonify(res)
 
 
 @m.route('/movie_details_page/<movie_id>', methods=['GET'])
 def movie_details_page(movie_id):
     movie = Movie.query.get(int(movie_id))
-    # 更新访问次数
-    global ACCESS_IP
-    try:
-        now = datetime.datetime.now()
-        ACCESS_IP = {k: v for k, v in ACCESS_IP.items() if (now - k).seconds < 60}
-        ips = set(ACCESS_IP.values())
-        if request.remote_addr not in ips:
-            movie.views += 1
-            ACCESS_IP[datetime.datetime.now()] = request.remote_addr
+    movie_key = 'movie:' + movie_id
+    # save ip if no login
+    id_or_ip = current_user.id if hasattr(current_user, 'id') else request.remote_addr
+    redis_client.sadd(movie_key, id_or_ip)
+
+    current_app.logger.info(f'{id_or_ip} '
+                            f'views movie {movie.id}:{movie.name} nums:{movie.view_nums} '
+                            f'redis_num:{redis_client.scard(movie_key)}')
+
+    movie.view_nums += redis_client.scard(movie_key)
+
+    # 超过 容量,删除重新开始. TODO 加入时间控制:时间窗口内同一用户或 ip 的多次访问算为一次.
+    if redis_client.scard(movie_key) > MAX_CACHE_VIEW_NUM:
+        current_app.logger.info(f'redis movie_view_nums full. update db')
         db.session.commit()
-    except:
-        return render_template('movieDetail.html', movie=movie)
-    return render_template('movieDetail.html', movie=movie)
+        redis_client.delete(movie_key)
+        redis_client.sadd(movie_key, id_or_ip)
+
+    return render_template('movie/movieDetail.html', movie=movie)
 
 
 @m.route('/movie_details')
@@ -125,14 +128,14 @@ def movie_details():
     return jsonify(
         {'id': movie.id,
          'name': movie.name,
-         'genre': movie.genre,
-         'actor': movie.actor,
+         'genres': movie.genres,
+         'actors': movie.actors,
          'director': movie.director,
          'score': movie.score,
-         'views': movie.views,
+         'view_nums': movie.view_nums,
          'video_path': movie.video_path,
-         'collect_num': movie.collect_num,
-         'eva_num': movie.eva_num,
+         'collect_nums': movie.collect_nums,
+         'rating_nums': movie.rating_nums,
          'img_path': movie.img_path
          }
     )
@@ -154,16 +157,16 @@ def get_all_movie_comments():
     movie_id = request.args.get('movie_id')
     curr_page = int(request.args.get('curr_page'))
     curr_page = 1 if curr_page is None else curr_page
-    comments = Rating.query.order_by(db.desc(Rating.eva_date)).filter(
+    comments = Rating.query.order_by(db.desc(Rating.rating_date)).filter(
         Rating.movie_id == movie_id).limit(COMMENT_PAGE_SIZE).offset(
         (curr_page - 1) * COMMENT_PAGE_SIZE)
 
     res = [{
         'id': c.id,
-        'eva_date': str(c.eva_date),
+        'eva_date': str(c.rating_date),
         'comment': c.comment,
-        'score': c.score,
-        'username': c.user.username}
+        'score': c.rating,
+        'username': c.user_id}
         for c in comments]
     return jsonify(res)
 
@@ -203,8 +206,10 @@ def add_new_comments():
 
     curr_user_id = current_user.id
 
-    me = Rating(comment)
-    me.score = score
+    # TODO 首先判断该用户是否已经评论打分过该电影
+    me = Rating()
+    me.comment = comment
+    me.rating = score
     me.movie_id = movie_id
     me.user_id = curr_user_id
 
@@ -244,7 +249,7 @@ def get_all_my_collections():
 @login_required
 def recommend_movies():
     user_id = current_user.id
-    res = apriori.recommend_by_user_id(user_id, model_path=MODEL_PATH)
+    res = apriori.recommend_by_user_id(user_id)
     return jsonify(res)
 
 
@@ -265,21 +270,21 @@ def del_collection():
 
 @m.route('/movie_index')
 def movie_index():
-    return render_template('movieIndex.html')
+    return render_template('movie/movieIndex.html')
 
 
 @m.route('/news_page')
 def news_page():
-    return render_template('news.html')
+    return render_template('feature/news.html')
 
 
 @m.route('/my_collection')
 @login_required
 def collection_page():
-    return render_template('myCollection.html')
+    return render_template('user/myCollection.html')
 
 
 @m.route('/my_recommend')
 @login_required
-def my_recommed_page():
-    return render_template('my_recommend.html')
+def my_recommend_page():
+    return render_template('user/my_recommend.html')

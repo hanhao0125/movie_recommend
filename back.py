@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, request, jsonify
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 from config import *
-from settings import db
+from settings import db, apriori_model
 from utils import admin_required
 from apriori import apriori
 import models
@@ -22,7 +22,7 @@ def show():
 @b.route('/user_manage')
 @admin_required()
 def user_manage():
-    return render_template('user_manage.html')
+    return render_template('back/user_manage.html')
 
 
 @b.route('/users')
@@ -214,7 +214,7 @@ def del_guest():
 @b.route('/movie_manage')
 @admin_required()
 def movie_manage():
-    return render_template('movieManage.html')
+    return render_template('back/movieManage.html')
 
 
 @b.route('/movie_category')
@@ -404,17 +404,17 @@ def upload_news_img():
 def training():
     support = float(request.args.get('support'))
     confidence = float(request.args.get('confidence'))
-    global MODEL_PATH
-    # try:
-    MODEL_PATH = apriori.generate_rules(min_support=support, min_confidence=confidence)
-    # except Exception as e:
-    #     print(e)
-    #     return jsonify({
-    #         'message': 'error'
-    #     })
-    sampels_rules, rules_num = apriori.samples_of_rules(MODEL_PATH)
+    try:
+        global apriori_model
+        apriori_model = apriori.generate_rules(min_support=support, min_confidence=confidence)
+    except Exception as e:
+        print(e)
+        return jsonify({
+            'message': 'error'
+        })
+    sample_rules, rules_num = apriori.samples_of_rules(apriori_model)
     return jsonify({
-        'rules': sampels_rules,
+        'rules': sample_rules,
         'num': rules_num,
         'message': 'success'
     })
@@ -423,4 +423,4 @@ def training():
 @b.route('/re_setting')
 @admin_required()
 def re_setting():
-    return render_template('recommend_setting.html')
+    return render_template('back/recommend_setting.html')
