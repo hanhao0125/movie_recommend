@@ -3,3 +3,4 @@ __pycache__/
 .cache/
 .DS_Store
 *.log
+application/recommend_model/saved_model
