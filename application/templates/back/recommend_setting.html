@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}
+    推荐设置
+{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+    #li-news{
+        margin-top: 20px;
+    }
+    #row{
+        font-size: larger;
+        margin-left: 250px;
+        margin-right: 300px;
+    }
+    a:link{
+        color: black;
+        text-decoration:none;
+    }
+    a:hover{
+        color: #FF7E00;
+        text-decoration:underline;
+    }
+    .edit-button{
+        width: 30%;
+        display: block;
+        margin: 30px 300px 20px 800px;
+    }
+    .editor-title{
+        margin: 0 0 10px 0;
+    }
+    .editor{
+        margin: 0px 0 10px 0;
+        width: 100%;
+        height: 400px;
+    }
+    .s{
+        margin: 50px 0 0 50px;
+    }
+
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+<div id="re">
+    <el-row type="flex" justify="center" class="s">
+        <el-col :span="5">
+            <el-tooltip class="item" effect="dark" content="支持度就是所有我们分析的交易中，某两种（若干种）商品同时被购买的概率（比率）。" placement="top">
+                <h3>最小支持度</h3>
+            </el-tooltip>
+        </el-col>
+        <el-col :span="5">
+             <el-tooltip class="item" effect="dark" content="置信度就是根据某一个条件，得到一个结论的可信程度、可靠程度。" placement="top">
+                    <h3>最小置信度</h3>
+            </el-tooltip>
+        </el-col>
+    </el-row>
+
+<el-row type="flex" justify="center">
+        <el-col :span="5">
+            <el-input-number v-model="support"
+                                :min="0.001" :max="1" :step="0.05"></el-input-number>
+        </el-col>
+        <el-col :span="5">
+            <el-input-number v-model="confidence" :min="0.1" :max="1" :step="0.1"></el-input-number>
+        </el-col>
+</el-row>
+ <el-row type="flex" justify="center" class="s">
+     <el-col :span="5">
+
+        <el-button size="large" type="primary" @click="training">
+            执行分析
+        </el-button>
+     </el-col>
+
+</el-row>
+<div v-if="show" style="margin: 40px 200px 50px 200px">
+    <h5>共生成{{rules_num}}条规则</h5>
+    <h2>TOP 20 Rules</h2>
+
+    <el-table
+      :data="res"
+      style="width: 100%">
+      <el-table-column
+        prop="antecedants"
+        label="antecedants"
+        width="400"
+        :formatter="formAn"
+      align="center">
+      </el-table-column>
+      <el-table-column
+        prop="consequents"
+        label="consequents"
+        width="400"
+      :formatter="formCon"
+        align="center">
+      </el-table-column>
+      <el-table-column
+        prop="confidence"
+        label="置信度"
+        align="center"
+        >
+      </el-table-column>
+    </el-table>
+</div>
+</div>
+{% endblock %}
+{% block vue %}
+<script>
+    app.activeIndex= 'b/recommendSetting';
+
+    new Vue({
+            el: '#re',
+            data: {
+                support:0.1,
+                confidence:0.6,
+                res:[],
+                rules_num:0,
+                show:false
+            },
+
+            methods: {
+                formAn:function(row,column) {
+                    res = '';
+                    for (let i=0; i < row['antecedants'].length; i++) {
+                        {#res.push(row['antecedants'][i].name);#}
+                        res += row['antecedants'][i].name + ','
+                    }
+                    return res.slice(0,-1)
+                },
+                formCon:function(row,column) {
+                    res = '';
+                    for (let i=0; i < row['consequents'].length; i++) {
+                        {#res.push(row['antecedants'][i].name);#}
+                        res += row['consequents'][i].name + ','
+                    }
+                    return res.slice(0,-1)
+                },
+                training: function () {
+                    const loading = this.$loading({
+                      lock: true,
+                      text: '生成模型中，请耐心等待',
+                      spinner: 'el-icon-loading',
+                      background: 'rgba(0, 0, 0, 0.7)'
+                    });
+                    this.$http.get('/b/training_apriori',{params:{support:this.support,confidence:this.confidence}}).then(function (data) {
+                        data = data.body;
+                        if (data.message === 'success') {
+                            this.$message({
+                                'message':'成功',
+                                'type':'success'
+                            });
+                            this.rules_num = data.num;
+                            this.res = data.rules;
+                            this.show = true;
+                            loading.close()
+                        } else {
+                            this.$message.error('失败')
+                        }
+                    }, function (response) {
+                        console.info(response);
+                    });
+
+                }
+            },
+
+            created: function () {
+
+            },
+            mounted:function () {
+
+        }
+        });
+</script>
+{% endblock %}

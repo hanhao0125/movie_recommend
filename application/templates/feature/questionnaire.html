@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}首页{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div id="questionnaire">
+    <el-row type="flex" justify="center">
+        <h1>问卷调查</h1>
+    </el-row>
+    <el-row type="flex"  justify="center">
+        <el-col :span="15">
+
+        <el-form ref="form" :model="form" label-width="300px" :label-position="left">
+        <el-form-item label="性别">
+        <el-radio-group v-model="form.sex">
+          <el-radio label="男"></el-radio>
+          <el-radio label="女"></el-radio>
+          <el-radio label="保密"></el-radio>
+        </el-radio-group>
+        </el-form-item>
+        <el-form-item label="喜爱电影类型">
+        <el-select v-model="form.favorite_genre" placeholder="请选择类型">
+          <el-option label="科幻" value="科幻"></el-option>
+          <el-option label="爱情" value="爱情"></el-option>
+          <el-option label="喜剧" value="喜剧"></el-option>
+          <el-option label="动作" value="动作"></el-option>
+          <el-option label="纪实" value="言情"></el-option>
+          <el-option label="玄幻" value="玄幻"></el-option>
+          <el-option label="其他" value="其他"></el-option>
+
+        </el-select>
+        </el-form-item>
+        <el-form-item label="从何种途径知道本网站">
+        <el-radio-group v-model="form.from_where">
+          <el-radio label="朋友介绍"></el-radio>
+          <el-radio label="百度搜索电影"></el-radio>
+          <el-radio label="商业推荐"></el-radio>
+          <el-radio label="无意发现"></el-radio>
+        </el-radio-group>
+        </el-form-item>
+        <el-form-item label="网站评分">
+            <el-rate
+              v-model="form.site_score"
+              show-text>
+            </el-rate>
+        </el-form-item>
+        <el-form-item label="网站建议">
+        <el-input type="textarea" v-model="form.suggest"></el-input>
+        </el-form-item>
+        <el-form-item>
+        <el-button type="primary" @click="onSubmit">提交</el-button>
+        <el-button>取消</el-button>
+        </el-form-item>
+    </el-form>
+    </el-col>
+    </el-row>
+
+</div>
+{% endblock %}
+{% block vue %}
+<script>
+    app.activeIndex = 'f/qa';
+    new Vue({
+        el: '#questionnaire',
+        data: {
+               form: {
+                  sex: '',
+                  favorite_genre: '',
+                  site_score: 0,
+                  from_where: '',
+                  suggest: '' }
+        },
+        methods: {
+            onSubmit:function(){
+
+                this.$http.post('/f/questionnaire', {
+                    sex: this.form.sex,
+                    favorite_genre: this.form.favorite_genre,
+                    score: this.form.site_score,
+                    from_where: this.form.from_where,
+                    suggest: this.form.suggest
+                }, {emulateJSON: true}).then(function (data) {
+                    if (data.body.res === 'success') {
+                        window.location.href = '/'
+
+                    } else {
+                        this.$message.error(data.body.res)
+                    }
+                }, function (response) {
+                    console.info(response);
+                })
+            }
+
+        },
+
+        created: function () {
+        }
+    })
+</script>
+{% endblock %}
+
+

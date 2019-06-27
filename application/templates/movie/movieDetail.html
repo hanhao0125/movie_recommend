@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+{% block title %}
+    电影详情
+{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+       img{
+           float: left;
+     max-height:180px;
+     max-width: 300px;
+     vertical-align:middle;
+        overflow: hidden;
+ }
+    h1 {
+    word-wrap: break-word;
+    display: block;
+    font-size: 25px;
+    font-weight: bold;
+    color: #494949;
+    margin: 0;
+    padding: 0 0 15px 0;
+    line-height: 1.1;
+}
+    .pl {
+        margin: 2px 0 2px 15px;
+    font: 15px Arial, Helvetica, sans-serif;
+    line-height: 150%;
+    color: #666666;
+        display: block;
+}
+    .attr{
+    font: 15px Arial, Helvetica, sans-serif;
+    line-height: 150%;
+    color: #37a;
+    }
+    .score{
+    font: 15px Arial, Helvetica, sans-serif;
+    line-height: 150%;
+    color: rgb(224, 144, 21);
+    }
+    .admin_btn {
+        float: right;
+        display: block;
+        margin-left: 10px;
+    }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/video.js@6.6.2/dist/video-js.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vue-video-player@5.0.0/src/custom-theme.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div id="movieDetails" style="margin: 50px 150px 50px 150px" oncontextmenu = "return false">
+    <h1>{{movie.name}}</h1>
+
+    <img :src="movie.img_path" :alt="movie.name">
+
+    <div style="float: left">
+        <span class="pl">导演：<span class="attr">{{ movie.director }}</span></span>
+        <span class="pl">演员：<span class="attr">{{ movie.actors }}</span></span>
+        <span class="pl"> 类型：<span>{{ movie.genres }}</span></span>
+        <span class="pl">评分：<span class="score">{{ movie.score }}</span></span>
+        <span class="pl">浏览次数：{{ movie.view_nums }}</span>
+        <span class="pl">收藏次数：{{ movie.collect_nums }}</span>
+        <span class="pl">评价次数：{{ movie.rating_nums }}</span>
+    </div>
+    {% if current_user.is_admin == true %}
+    <el-upload :action="'/update_movie_front/' + movie.id" multiple
+               :on-success="successUpdate"
+                class="admin_btn">
+                <el-button type="danger">更新电影封面</el-button>
+    </el-upload>
+    <el-button type="danger" @click="update_movie.show=true" class="admin_btn">更新电影信息</el-button>
+    <el-upload :action="'/upload_video/' + movie.id" multiple
+               :on-success="successUpload" :on-progress="uploading"
+                class="admin_btn">
+            <el-button type="danger" >上传电影视频</el-button>
+    </el-upload>
+    {% endif %}
+
+    <div v-if="fuck" style="margin-top: 220px">
+        <video-player class="vjs-custom-skin"
+                        ref="videoPlayer"
+                        :options="playerOptions"
+                        @timeupdate="onPlayerTimeupdate($event)"
+                        >
+          </video-player>
+    </div>
+    <el-row style="margin-top: 10px;margin-bottom: 10px" type="flex" justify="center">
+        {% if current_user.is_authenticated %}
+            <el-button type="success" @click="downloadMovie">下载</el-button>
+            <el-button type="success" @click="mark_visible=true">收藏</el-button>
+        {% endif %}
+    </el-row>
+    <el-row style="margin-top: 10px">
+
+    </el-row>
+    <h2>《{{movie.name}}》的短评</h2>
+    <el-row>
+    <el-col :span="12">
+            <div style="margin-top: 20px">
+
+                <el-rate
+                    v-model="new_comment.score"
+                    :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                    :max=10
+                    style="margin-bottom: 5px">
+                </el-rate>
+                <el-input
+                    type="textarea"
+                    :rows="3"
+                    placeholder="请输入短评"
+                    v-model="new_comment.comment">
+                </el-input>
+                {%  if current_user.is_authenticated %}
+
+                <el-button type="primary" size="small" @click="pubComment" style="margin-top: 5px">发布短评</el-button>
+                {% else %}
+                <el-button type="primary" size="small" style="margin-top: 5px" disabled>发布短评</el-button>
+                {% endif %}
+
+            </div>
+        </el-col>
+    </el-row>
+    <el-row v-for="c in comments" style="margin-top: 10px;width: 70%">
+        <el-card class="box-card">
+        <div slot="header" class="clearfix">
+            <span style="color: #3985b5">{{c.username}}</span>
+            <p style="font-size: small;color: darkgray;float: right;">{{c.eva_date}}</p>
+
+            <el-rate
+                    v-model="c.score"
+                    :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                    :max=10
+                    disabled
+                    show-score
+                    style="float: right; padding: 3px 0;margin-right: 60px">
+            </el-rate>
+        </div>
+            <p>{{c.comment}}</p>
+    </el-card>
+
+    </el-row>
+    <el-row v-if="done">
+         <el-button @click="getPageComments" type="success" style="display: block;width: 30%;margin-top: 10px">
+            加载更多
+        </el-button>
+    </el-row>
+    <el-dialog
+          title="收藏电影"
+          :visible.sync="mark_visible"
+          width="30%"
+          >
+          <span>
+              <el-input v-model="collect_mark"  type="textarea" :rows="2" placeholder="说点什么..."></el-input>
+
+          </span>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="mark_visible = false">取 消</el-button>
+            <el-button type="primary" @click="submitCollection">确 定</el-button>
+          </span>
+        </el-dialog>
+        <el-dialog title="更新电影信息" :visible.sync="update_movie.show">
+        电影名称:<el-input v-model="update_movie.name" placeholder=""></el-input>
+        导演：<el-input v-model="update_movie.director" style="margin-top: 5px"></el-input>
+        演员：<el-input v-model="update_movie.actor" style="margin-top: 5px"></el-input>
+        类型：<el-input v-model="update_movie.genre" style="margin-top: 5px"></el-input>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="update_movie.show = false">取 消</el-button>
+           <el-button type="primary" @click="updateMovie">确 定</el-button>
+        </div>
+        </el-dialog>
+</div>
+{% endblock %}
+{% block vue %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/6.6.2/video.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-video-player@5.0.0/dist/vue-video-player.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"
+  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+  crossorigin="anonymous"></script>
+
+<script>
+    $('#video').bind('oncontextmenu',function() { return false; });
+    Vue.use(VueVideoPlayer);
+
+    app.activeIndex = 'm/movieIndex';
+    md = new Vue({
+        el: '#movieDetails',
+        data: {
+            fuck:true,
+            movie:{},
+            new_comment:{
+                comment:'',
+                score:1
+            },
+            done:true,
+            comments:[],
+            curr_page:0,
+            collect_id:-1,
+            collect_mark:'',
+            mark_visible:false,
+            update_movie:{
+                show:false,
+                actor:'{{ movie.actor }}',
+                director:'{{ movie.director }}',
+                genre:'{{ movie.genre }}',
+                id:{{ movie.id }},
+                name:'{{ movie.name }}'
+            },
+            playerOptions: {
+                    fluid:true,
+                    autoplay: false,
+                    muted: false,
+                    playbackRates: [0.7, 1.0, 1.5, 2.0],
+                    sources: [{
+                        type: "video/mp4",
+                        // mp4
+                        src: "/static/video/test.mp4"
+                    }],
+                    poster: ""
+                }
+        },
+        methods: {
+            successUpdate:function (data,file,fileList) {
+                if (data['res'] === 'success') {
+                  this.movie.img_path = data['img_path'];
+              }
+            },
+            // 上传时禁止用户播放，影响上传速度。
+            uploading:function(){
+                this.player.pause()
+            },
+            // 重新载入播放器
+            reloadVideo:function(video_path) {
+                this.playerOptions.sources[0].src = video_path;
+                  this.fuck = false;
+                  this.$nextTick(() => {
+                      this.fuck = true
+                });
+                this.player.play()
+            },
+            successUpload:function(data,file,fileList) {
+              if (data['res'] === 'success') {
+                  this.movie.video_path = data['video_path'];
+                  this.reloadVideo(data['video_path']);
+              }
+            },
+            updateMovie:function () {
+                this.$http.post('/b/update_movie', {
+                    actor:this.update_movie.actor,
+                    director:this.update_movie.director,
+                    genre:this.update_movie.genre,
+                    id:this.update_movie.id,
+                    name:this.update_movie.name
+                }, {emulateJSON: true}).then(function (data) {
+                    if (data.body === 'success') {
+                        this.update_movie.show = false;
+                        this.$message({
+                            message:'更新成功',
+                            type:'success'
+                        });
+                        this.movie.actor = this.update_movie.actor;
+                        this.movie.director = this.update_movie.director;
+                        this.movie.genre = this.update_movie.genre;
+                        this.movie.name = this.update_movie.name;
+                        {#document.location.reload();#}
+                    } else {
+                        this.message.error('更新失败，请联系管理员')
+                    }
+                }, function (response) {
+                    console.info(response);
+                })
+            },
+            submitCollection:function() {
+                this.$http.post('/m/collect_movie', {
+                    movie_id: this.movie.id,
+                    mark: this.collect_mark
+                }, {emulateJSON: true}).then(function (data) {
+                    this.mark_visible = false;
+                    if (data.body=== 'success') {
+                        this.$message({
+                          message: '收藏成功！',
+                          type: 'success'
+                        });
+                        this.movie.collect_num += 1
+                    } else if (data.body === 'collected') {
+                        this.$message('已经收藏，请勿重复操作');
+                    } else {
+                        this.$message.error('收藏失败，请联系管理员')
+                    }
+                })
+            },
+            downloadMovie:function () {
+                window.location.href = '/m/movie_video/' + this.movie.id;
+                this.$http.get('/m/movie_video/' + this.movie_id).then(function (data) {
+                    this.movie = data.body;
+                }, function (response) {
+                })
+            },
+            getMovieDetails: function () {
+                this.$http.get('/m/movie_details',{params:{movie_id:{{ movie.id }}}}).then(function (data) {
+                    this.movie = data.body;
+                    this.playerOptions.poster=this.movie.img_path;
+                    this.reloadVideo(this.movie.video_path)
+
+                }, function (response) {
+                })
+            },
+            // 用户发表评论后更新显示评分
+            pubComment:function () {
+                this.$http.post('/m/comment', {
+                        comment: this.new_comment.comment,
+                        score:this.new_comment.score,
+                        movie_id:this.movie.id
+                    }, {emulateJSON: true}).then(function (data) {
+                        data = data.body;
+                        if (data['res'] === 'success') {
+                            this.curr_page = 0;
+                            this.comments = [];
+                            this.getPageComments();
+                            this.movie.score= data['score'];
+                            this.new_comment.comment = '';
+                            this.new_comment.score = 1;
+                            this.movie.eva_num += 1
+                        }
+                    }, function (response) {
+                    })
+            },
+            getPageComments:function () {
+                this.curr_page += 1;
+                this.$http.get('/m/movie_comments',{params:{movie_id:{{ movie.id }},curr_page:this.curr_page }}).then(function (data) {
+                    if (data.body.length === 0) {
+                        this.done = false;
+                        return
+                    }
+                    this.comments = this.comments.concat(data.body);
+                }, function (response) {
+                })
+            },
+            // 检测播放器进度，如果为未登录用户，则只允许播放三分钟。
+            onPlayerTimeupdate(player) {
+                {% if not current_user.is_authenticated %}
+                    if (player.currentTime() > 180) {
+                        player.currentTime(0);
+                        this.$message.error('非登录用户只能观看三分钟，请尝试登录后继续观看');
+                        player.pause()
+                    }
+                {% endif %}
+            },
+            playerStateChanged(playerCurrentState) {
+             {#console.log('player current update state', playerCurrentState)#}
+          }
+
+        },
+
+        created: function () {
+            this.getMovieDetails();
+            this.getPageComments();
+        },
+        computed: {
+            player() {
+                return this.$refs.videoPlayer.player
+            }
+        },
+        mounted() {
+          setTimeout(() => {
+          }, 2000)
+        }
+    });
+
+</script>
+{% endblock %}

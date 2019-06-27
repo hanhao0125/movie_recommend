@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+<link rel="icon" href="/static/img/timg.ico" type="image/x-icon"/>
+    <style type="text/css">
+        #menu-item {
+            font-size: 18px;font-weight: bolder
+          }
+        body{
+            background-color: rgb(238, 238, 238);
+            margin: 0 0 0 0;
+        }
+        .user-info{
+            font-size: 2px;
+            float: right;
+            font-weight: lighter;
+        }
+    </style>
+    {% block head %}
+        <!-- import Vue.js -->
+        <!-- 引入样式 -->
+        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+        <!-- 引入组件库 -->
+
+        <title>{% block title %}{% endblock %}</title>
+    {% endblock %}
+</head>
+<body>
+<div id="app">
+
+    <div id="content" style="margin-bottom: 10px">
+
+
+        <el-menu
+                :default-active="activeIndex"
+                mode="horizontal"
+                @select="handleSelect"
+                background-color="#155B88"
+                text-color="#fff"
+                active-text-color="#FF7E00"
+                style="margin: 0 0 0 0"
+                >
+        <el-row type="flex" justify="center" >
+            <el-menu-item index="m/movieIndex" id="menu-item">电影主页</el-menu-item>
+            <el-menu-item index="f/gb"  id="menu-item">留言板</el-menu-item>
+            <el-menu-item index="f/news"       id="menu-item">新闻公告</el-menu-item>
+
+            {% if current_user.is_admin %}
+            <el-menu-item index="b/userManage" id="menu-item">用户管理</el-menu-item>
+            <el-menu-item index="b/movieManage" id="menu-item">电影管理</el-menu-item>
+            <el-menu-item index="f/infoStatistics" id="menu-item">信息统计</el-menu-item>
+            <el-menu-item index="b/recommendSetting" id="menu-item">推荐设置</el-menu-item>
+            {% endif %}
+            {% if current_user.is_authenticated %}
+                <el-menu-item index="m/myCollection" id="menu-item">我的收藏</el-menu-item>
+                <el-menu-item index="m/myRecommend" id="menu-item">我的推荐</el-menu-item>
+                <el-menu-item index="f/qa" id="menu-item">问卷调查</el-menu-item>
+                <el-menu-item index="u/logout" style="float: right" id="menu-item">注销</el-menu-item>
+                <el-menu-item index="u/userInfo" class="user-info">欢迎您，{{ current_user.username }}</el-menu-item>
+
+            {% else %}
+                <el-menu-item index="u/login" style="float: right" id="menu-item">登录</el-menu-item>
+            {% endif %}
+
+            </el-menu-item>
+        </el-row>
+        </el-menu>
+
+
+    </div>
+</div>
+{% block content %}
+
+{% endblock %}
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/vue/dist/vue.js"></script>
+<script type="text/javascript" src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+<script>
+    var app =  new Vue({
+        el: '#app',
+        data: {
+            activeIndex: 'm/movieIndex'
+        },
+        methods: {
+
+            handleSelect: function (key, keyPath) {
+                if (key === 'm/myCollection') {
+                    this.activeIndex = 'm/myCollection';
+                    window.location.href = '/m/my_collection'
+                }
+                else if (key === "b/userManage") {
+                    this.activeIndex = 'b/userManage';
+                    window.location.href = '/b/user_manage'
+                } else if (key === 'm/myRecommend') {
+                     window.location.href = '/m/my_recommend'
+                }
+                else if (key === "f/infoStatistics") {
+                        this.activeIndex = 'f/infoStatistics';
+                        window.location.href = '/f/st'
+
+                }
+
+                else if (key === 'b/movieManage') {
+                    this.activeIndex = 'b/movieManage';
+                    window.location.href='/b/movie_manage'
+
+                } else if (key === 'f/qa') {
+                    this.activeIndex = 'f/qa';
+                    window.location.href = '/f/qa'
+                }
+
+                else if (key === 'm/movieIndex') {
+                    this.activeIndex = 'm/movieIndex';
+                    window.location.href = '/m/movie_index'
+
+                }
+
+                else if (key === 'f/gb') {
+                    this.activeIndex = 'f/gb';
+                    window.location.href='/f/gb';
+
+                }
+
+                else if (key === 'f/news') {
+                    this.activeIndex = 'f/news';
+                    window.location.href='/f/nw';
+                }
+                else if (key === 'u/logout') {
+                    this.activeIndex = 'u/logout';
+                    window.location.href='/u/logout'
+                } else if (key === 'u/login') {
+                    this.activeIndex = '/u/login';
+                    window.location.href = '/u/login'
+                } else if (key === 'b/recommendSetting') {
+                    window.location.href = '/b/re_setting'
+                } else if (key === 'u/userInfo') {
+                    window.location.href = '/u/user_info'
+                }
+            }
+        },
+        created: function () {
+        }
+    })
+</script>
+{% block vue %}
+
+{% endblock %}
+</html>

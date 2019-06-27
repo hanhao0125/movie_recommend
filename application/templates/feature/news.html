@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}
+    新闻
+{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+    #li-news{
+        margin-top: 20px;
+    }
+    #row{
+        font-size: larger;
+        margin-left: 250px;
+        margin-right: 300px;
+    }
+    a:link{
+        color: black;
+        text-decoration:none;
+    }
+    a:hover{
+        color: #FF7E00;
+        text-decoration:underline;
+    }
+    .edit-button{
+        width: 30%;
+        display: block;
+        margin: 30px 300px 20px 800px;
+    }
+    .editor-title{
+        margin: 0 0 10px 0;
+    }
+    .editor{
+        margin: 0 0 10px 0;
+        width: 80%;
+        height: 250px;
+    }
+
+    </style>
+    <link rel="stylesheet" type="text/css" href="../../static/dist/css/wangEditor.min.css">
+
+{% endblock %}
+
+{% block content %}
+
+<div id="fuck">
+
+</div>
+
+<div id="news">
+    {% if current_user.is_admin %}
+    <el-button @click="edit_news=!edit_news" class="edit-button" >
+            编辑新闻
+    </el-button>
+    <el-row type="flex" justify="center">
+            <div v-show="edit_news">
+            <el-input v-model="pub_new.title" placeholder="请输入新闻标题" class="editor-title"></el-input>
+            <div id="editor" class="editor"><p> 新闻内容</p></div>
+            <el-button type="primary" size="small" @click="pubNews" style="margin-top: 5px">发布新闻</el-button>
+            </div>
+    </el-row>
+    {% endif %}
+    <el-row id="row">
+        <ul>
+       <li v-for="n in news" id="li-news">
+           <a href="#" @click="goToNews(n.id)">{{n.title}}</a>
+           {% if current_user.is_admin %}
+           <span style="float: right;">
+               <el-button type="text" @click="delNews(n.id)" size="small">删除新闻</el-button>
+           </span>
+           {% endif %}
+           <span style="float: right;margin-right: 10px">[{{n.pub_date.substring(0,10)}}]</span>
+
+
+       </li>
+        </ul>
+    </el-row>
+</div>
+{% endblock %}
+{% block vue %}
+{#<script type="text/javascript" src="/static/js/wangEditor.min.js"></script>#}
+{#<script src="//unpkg.com/wangeditor/release/wangEditor.min.js"></script>#}
+<script type="text/javascript" src="../../static/dist/js/lib/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="../../static/dist/js/wangEditor.min.js"></script>
+<script>
+    app.activeIndex= 'news';
+
+    new Vue({
+            el: '#news',
+            data: {
+                news: [],
+                pub_new: {
+                    state: false,
+                    title: '',
+                    content: ''
+                },
+                edit_news:false,
+                edt:''
+            },
+
+            methods: {
+                goToNews:function (id) {
+                  window.location.href = '/f/news/' + id
+                },
+                editNews:function () {
+                    this.edit_news = true
+                },
+                delNews:function (id) {
+                    this.$http.get('/b/del_news', {
+                        params:{id:id}
+                    }).then(function (data) {
+                        this.msg = data.body;
+                        if (this.msg === 'success') {
+                            this.$message({
+                                message:'删除成功！',
+                                type:'success'
+                            });
+                            this.getAllNews();
+
+                        } else {
+                            this.$message.error('删除失败')
+                        }
+                    }, function (response) {
+                        console.info(response);
+                    })
+                },
+                pubNews: function () {
+                    this.$http.post('/b/pub_news', {
+                        title: this.pub_new.title,
+                        content: this.pub_new.content
+                    }, {emulateJSON: true}).then(function (data) {
+                        this.pub_new.state = false;
+                        this.pub_new.content = '';
+                        this.pub_new.title='';
+                        this.msg = data.body;
+                        if (this.msg === 'success') {
+                            this.getAllNews();
+                            this.edt.clear();
+                            this.edit_news = false
+                        }
+                    })
+                },
+                getAllNews: function () {
+                    this.$http.get('/f/news').then(function (data) {
+                        this.news = data.body;
+                    }, function (response) {
+                        console.info(response);
+                    })
+                }
+            },
+
+            created: function () {
+                this.getAllNews();
+
+
+            },
+            mounted:function () {
+            let self = this;
+            const editor = new wangEditor('editor');
+
+            editor.onchange = function () {
+                    // onchange 事件中更新数据
+                    self.pub_new.content = editor.$txt.html();
+                    console.log(editor.$txt.html())
+                };
+            editor.config.uploadImgUrl = '/upload_img';
+            editor.config.uploadImgFileName = 'files';
+            editor.config.uploadHeaders = {
+                'Accept' : 'text/x-json'
+            };
+            editor.create();
+            self.edt = editor
+        }
+        });
+</script>
+{% endblock %}
