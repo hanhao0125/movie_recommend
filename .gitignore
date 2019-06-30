@@ -4,3 +4,6 @@ __pycache__/
 .DS_Store
 *.log
 application/recommend_model/saved_model
+application/recommend_models/saved_model/knn
+application/recommend_models/saved_model/svd
+application/recommend_models/saved_model/svd_simple

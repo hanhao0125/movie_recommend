@@ -1,4 +1,4 @@
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:@localhost/mv'
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost/mv'
 SQLALCHEMY_COMMIT_ON_TEARDOWN = False
 REDIS_URL = "redis://:123456@127.0.0.1:6379/0"
 
