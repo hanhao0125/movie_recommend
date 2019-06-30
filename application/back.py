@@ -2,14 +2,16 @@ import datetime
 import json
 import os
 
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user
 from werkzeug.utils import secure_filename
-from config import *
-from settings import db, apriori_model
-from utils import admin_required
+
+from application.config import *
+from application.database import (GuestBook, Movie, MovieCategory, MovieCatRe,
+                                  News, Qa, Rating, User, UserCollection)
+from application.settings import apriori_model, db
+from application.utils import admin_required
 from apriori import apriori
-import models
 
 b = Blueprint('back', __name__, template_folder='templates')
 
@@ -30,7 +32,7 @@ def user_manage():
 def get_all_users():
     curr_page = request.args.get('curr_page')
     curr_page = 1 if curr_page is None else int(curr_page)
-    users = models.User.query.limit(PAGE_SIZE).offset(
+    users = User.query.limit(PAGE_SIZE).offset(
         (curr_page - 1) * PAGE_SIZE)
     res = []
     for i in users:
@@ -44,7 +46,7 @@ def get_all_users():
 @admin_required()
 def give_admin():
     id = request.args.get('id')
-    user = models.User.query.get(id)
+    user = User.query.get(id)
     if user is None:
         return jsonify('user not exists')
     user.is_admin = True
@@ -63,7 +65,7 @@ def update_user():
     if id is None:
         return 'id is none'
 
-    user = models.User.query.get(id)
+    user = User.query.get(id)
     if user is None:
         return jsonify('user not exists')
 
@@ -80,7 +82,7 @@ def update_user():
 def delete_user():
     account = request.args.get('account')
 
-    u = models.User.query.filter(account == models.User.account).first()
+    u = User.query.filter(account == User.account).first()
 
     if u is None:
         return 'true'
@@ -94,7 +96,7 @@ def delete_user():
 @admin_required()
 def freeze_user():
     _id = request.args.get('id')
-    u = models.User.query.get(_id)
+    u = User.query.get(_id)
 
     if u is None:
         return 'user_not_exists'
@@ -107,7 +109,7 @@ def freeze_user():
 @admin_required()
 def release_freeze():
     _id = request.args.get('id')
-    u = models.User.query.get(_id)
+    u = User.query.get(_id)
 
     if u is None:
         return 'success'
@@ -123,7 +125,7 @@ def publish_news():
     content = request.form['content']
     if title is None:
         return 'title is empty'
-    n = models.News(title, content)
+    n = News(title, content)
     n.user_id = current_user.id
     db.session.add(n)
     db.session.commit()
@@ -137,7 +139,7 @@ def delete_news():
     if _id is None:
         return 'id is empty'
 
-    n = models.News.query.get(_id)
+    n = News.query.get(_id)
     db.session.delete(n)
     db.session.commit()
     return 'success'
@@ -152,7 +154,7 @@ def update_movie():
     director = request.form['director']
     genre = request.form['genre']
 
-    movie = models.Movie.query.get(int(_id))
+    movie = Movie.query.get(int(_id))
     if movie is None:
         return jsonify('success')
 
@@ -170,23 +172,23 @@ def update_movie():
 @admin_required()
 def del_movie():
     _id = request.args.get('id')
-    movie = models.Movie.query.get(_id)
+    movie = Movie.query.get(_id)
     if movie is None:
         return jsonify('success')
 
     try:
         # 删除电影，同时删除电影之下的评论，收藏下的电影，movie_cat_re,movie_eva,user_collection
         # 删除评论
-        evas = models.Rating.query.filter(models.Rating.movie_id == id).all()
+        evas = Rating.query.filter(Rating.movie_id == id).all()
         for i in evas:
             db.session.delete(i)
         # 删除包含该分类的电影
-        cat = models.MovieCatRe.query.filter(models.MovieCatRe.movie_id == id).all()
+        cat = MovieCatRe.query.filter(MovieCatRe.movie_id == id).all()
         for c in cat:
             db.session.delete(c)
 
         # 删除用户收藏的电影
-        uc = models.UserCollection.query.filter(models.UserCollection.movie_id == id).all()
+        uc = UserCollection.query.filter(UserCollection.movie_id == id).all()
         for u in uc:
             db.session.delete(u)
         # 删除电影本身
@@ -203,7 +205,7 @@ def del_movie():
 @admin_required()
 def del_guest():
     _id = request.args.get('id')
-    g = models.GuestBook.query.filter(_id == models.GuestBook.id).first()
+    g = GuestBook.query.filter(_id == GuestBook.id).first()
     if g is None:
         return jsonify('success')
     db.session.delete(g)
@@ -220,7 +222,7 @@ def movie_manage():
 @b.route('/movie_category')
 @admin_required()
 def get_all_category():
-    c = models.MovieCategory.query.order_by(db.desc(models.MovieCategory.create_date)).all()
+    c = MovieCategory.query.order_by(db.desc(MovieCategory.create_date)).all()
     res = [{'id': i.id, 'create_date': str(i.create_date),
             'category': i.category, 'desc': i.desc} for i in c]
     return jsonify(res)
@@ -231,7 +233,7 @@ def get_all_category():
 def create_category():
     c = request.form['category']
     desc = request.form['desc']
-    category = models.MovieCategory(c, desc)
+    category = MovieCategory(c, desc)
     db.session.add(category)
     db.session.commit()
     return jsonify('success')
@@ -241,7 +243,7 @@ def create_category():
 @admin_required()
 def get_movies_from_category():
     category_id = request.args.get('id')
-    movies = models.MovieCatRe.query.filter(models.MovieCatRe.movie_cat_id == category_id).all()
+    movies = MovieCatRe.query.filter(MovieCatRe.movie_cat_id == category_id).all()
     res = [{'id': i.movie.id, 'name': i.movie.name,
             'genre': i.movie.genre,
             'actor': i.movie.actor,
@@ -259,7 +261,7 @@ def add_movie():
     director = request.form['director']
     actor = request.form['actor']
     genre = request.form['genre']
-    movie = models.Movie(name)
+    movie = Movie(name)
     movie.director = director
     movie.actor = actor
     movie.genre = genre
@@ -272,9 +274,9 @@ def add_movie():
 @admin_required()
 def get_movies_not_from_category():
     category_id = request.args.get('id')
-    movies = models.MovieCatRe.query.filter(models.MovieCatRe.movie_cat_id == category_id).all()
+    movies = MovieCatRe.query.filter(MovieCatRe.movie_cat_id == category_id).all()
     ids = [i.movie.id for i in movies]
-    movies = models.Movie.query.filter(~ models.Movie.id.in_(ids)).all()
+    movies = Movie.query.filter(~ Movie.id.in_(ids)).all()
     res = [{'id': i.id,
             'name': i.name,
             'director': i.director,
@@ -290,7 +292,7 @@ def add_movie_to_category():
     ids = json.loads(ids)
     ids = list(set(ids))
     for i in ids:
-        m = models.MovieCatRe(i, category_id)
+        m = MovieCatRe(i, category_id)
         db.session.add(m)
     db.session.commit()
     return jsonify('success')
@@ -300,7 +302,7 @@ def add_movie_to_category():
 @admin_required()
 def del_movie_from_category():
     _id = request.form['id']
-    m = models.MovieCatRe.query.filter(models.MovieCatRe.id == _id).first()
+    m = MovieCatRe.query.filter(MovieCatRe.id == _id).first()
 
     if m is not None:
         db.session.delete(m)
@@ -316,7 +318,7 @@ def update_category():
     name = request.form['name']
     desc = request.form['desc']
 
-    c = models.MovieCategory.query.get(int(_id))
+    c = MovieCategory.query.get(int(_id))
     if c is None:
         return jsonify('error')
     c.category = name
@@ -330,13 +332,13 @@ def update_category():
 def delete_category():
     _id = request.args.get('id')
 
-    c = models.MovieCategory.query.get(int(_id))
+    c = MovieCategory.query.get(int(_id))
 
     if c is None:
         return jsonify('error')
     # 先删除下面收录的电影
 
-    re = models.MovieCatRe.query.filter(models.MovieCatRe.movie_cat_id == id).all()
+    re = MovieCatRe.query.filter(MovieCatRe.movie_cat_id == id).all()
     for r in re:
         db.session.delete(r)
     # 再删除该类别
@@ -350,7 +352,7 @@ def delete_category():
 def upload(movie_id):
     if movie_id is None:
         return jsonify('error')
-    movie = models.Movie.query.get(int(movie_id))
+    movie = Movie.query.get(int(movie_id))
     if movie is None:
         return jsonify('error')
 
@@ -371,7 +373,7 @@ def upload(movie_id):
 def update_movie_front(movie_id):
     if movie_id is None:
         return jsonify('error')
-    movie = models.Movie.query.get(int(movie_id))
+    movie = Movie.query.get(int(movie_id))
     if movie is None:
         return jsonify('error')
 

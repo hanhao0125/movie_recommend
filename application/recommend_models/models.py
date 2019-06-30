@@ -59,8 +59,8 @@ def warp_object(ids, func):
 
 class RecommendModel(object):
     """
-    In out system, uid and mid all int.
-    So args of trainset.knows_user ,  predict and _raw2inner_id_users is int
+    ! In our system, uid and mid all int.
+    ! So args of trainset.knows_user ,  predict and _raw2inner_id_users is int
     """
 
     def __init__(self, model_name, load_model=True):
@@ -80,27 +80,6 @@ class RecommendModel(object):
             model = SVD()
         model.fit(trainset)
         dump.dump(f'{RECOMMEND_MODEL_SAVED_PATH}/svd', algo=model)
-
-    def recommend_movies_by_similar_user(self, uid):
-        uid = str(uid)
-        inner_user_id = self.model.trainset.to_inner_uid(uid)
-        neighbor_users = self.model.get_neighbors(inner_user_id, k=10)
-        print('neighbor users inner id: ', neighbor_users)
-        # 可能通过to_raw_uid把内部用户id转换为真实的用户id
-        neighbor_raw_uid = []
-        for u in neighbor_users:
-            neighbor_raw_uid.append(self.model.trainset.to_raw_uid(u))
-            print('real user id: ', self.model.trainset.to_raw_uid(u))
-        all_movies = []
-        for _uid in neighbor_raw_uid:
-            all_movies += get_movies_by_uid(_uid)
-        # drop the seen movie
-        seen_movies = get_movies_by_uid(uid, k=1e10)
-        # drop the duplicate movie by movie_id
-        filter_movie = _filter_movie_by_id(all_movies, seen_movies)
-        # sort by rating
-        sorted_re_movies = sorted(filter_movie, key=lambda x: x.id, reverse=False)
-        return sorted_re_movies
 
     def get_vector_by_user_id(self, uid: int) -> np.array:
         user_raw_idx = self.model.trainset._raw2inner_id_users[uid]
@@ -313,7 +292,9 @@ def get_top_n_rating_for_one_user(predictions, n=-1):
 def get_movie_object_by_id(mid: int):
     m = Movie.query.get(mid)
     if m:
-        return vars(m)
+        o = vars(m)
+        del o["_sa_instance_state"]
+        return o
     else:
         print(f'None object, please check the movie_id exist:{mid}')
         return None

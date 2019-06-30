@@ -4,8 +4,8 @@ from flask import (
 from flask_login import (
     current_user,
 )
-from settings import login_manager
-from models import User
+from application.settings import login_manager
+from application.database import User
 
 
 def admin_required():

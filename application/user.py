@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
-from settings import db
-from models import User
+from application.settings import db
+from application.database import User
 
 u = Blueprint('user', __name__, template_folder='templates')
 

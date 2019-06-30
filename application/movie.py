@@ -1,13 +1,14 @@
-from flask import Blueprint, current_app
-from flask import jsonify, render_template, request, send_file
+from flask import (Blueprint, current_app, jsonify, render_template, request,
+                   send_file)
 from flask_login import current_user, login_required
-
-from apriori import apriori
-from config import PAGE_SIZE, COMMENT_PAGE_SIZE, MAX_CACHE_VIEW_NUM
-from models import Movie, Rating, UserCollection
-from settings import db, redis_client
 from sqlalchemy import func
 
+from application.config import COMMENT_PAGE_SIZE, MAX_CACHE_VIEW_NUM, PAGE_SIZE
+from application.database import Movie, Rating, UserCollection
+from application.settings import db, redis_client
+from apriori import apriori
+from application.recommend_models.models import RecommendModel
+svd = RecommendModel(model_name='svd')
 m = Blueprint('movie', __name__, template_folder='templates')
 
 
@@ -244,12 +245,15 @@ def get_all_my_collections():
     ]
     return jsonify(res)
 
+# TODO add other recommend algo
+
 
 @m.route('/recommend_movies')
 @login_required
 def recommend_movies():
     user_id = current_user.id
-    res = apriori.recommend_by_user_id(user_id)
+    # res = apriori.recommend_by_user_id(user_id)
+    res = svd.recommend_movies_by_predict_ratings(uid=int(user_id))
     return jsonify(res)
 
 

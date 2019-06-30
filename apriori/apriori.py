@@ -1,13 +1,14 @@
-import pandas as pd
-from mlxtend.preprocessing import TransactionEncoder
-from mlxtend.frequent_patterns import apriori
-from mlxtend.frequent_patterns import association_rules
-from settings import db, apriori_model
 import pickle
+
 import numpy as np
-import models
+import pandas as pd
 from boxx import timeit
-from config import abs_path
+from mlxtend.frequent_patterns import apriori, association_rules
+from mlxtend.preprocessing import TransactionEncoder
+
+from application.config import abs_path
+from application.database import Movie, Rating, User
+from application.settings import apriori_model, db
 
 
 class Apriori:
@@ -106,10 +107,10 @@ def _is_in(a, b):
 
 
 def recommend_by_user_id(user_id):
-    user = models.User.query.get(int(user_id))
+    user = User.query.get(int(user_id))
     if user is None:
         return False
-    fav_movies = models.Rating.query.filter(models.Rating.user_id == user_id).all()
+    fav_movies = Rating.query.filter(Rating.user_id == user_id).all()
 
     print(f' fav movies length: {len(fav_movies)}')
 
@@ -131,7 +132,7 @@ def recommend_by_user_id(user_id):
 def get_movie_name_by_id(movie_id):
     m = []
     for id in movie_id:
-        movie = models.Movie.query.get(int(id))
+        movie = Movie.query.get(int(id))
         if movie:
             m.append(movie)
 
@@ -147,4 +148,3 @@ def get_movie_name_by_id(movie_id):
 if __name__ == '__main__':
     with timeit():
         generate_rules()
-

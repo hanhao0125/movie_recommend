@@ -3,8 +3,8 @@ from flask import jsonify, render_template, request
 from flask_login import current_user, login_required
 from sqlalchemy import func
 
-from models import GuestBook, Rating, Movie, User, Qa, News
-from settings import db
+from application.database import GuestBook, Rating, Movie, User, Qa, News
+from application.settings import db
 
 f = Blueprint('features', __name__, template_folder='templates')
 
@@ -21,7 +21,7 @@ def get_all_guests():
     for i in guests:
         res.append({
             'id': i.id,
-            'username': i.user.username,
+            'username': i.user_id,
             'content': i.content,
             'pub_date': str(i.pub_date)
         })
@@ -134,7 +134,7 @@ def get_all_news():
             'content': i.content,
             'id': i.id,
             'pub_date': str(i.pub_date),
-            'username': i.user.username
+            'username': i.user_id
             } for i in news]
     return jsonify(res)
 

@@ -3,74 +3,83 @@
 
 {% endblock %}
 {% block head %}
-    {{ super() }}
-    <style>
+{{ super() }}
+<style>
     /* table 样式 */
-table {
-  border-top: 1px solid #ccc;
-  border-left: 1px solid #ccc;
-}
-table td,
-table th {
-  border-bottom: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-  padding: 3px 5px;
-}
-table th {
-  border-bottom: 2px solid #ccc;
-  text-align: center;
-}
+    table {
+        border-top: 1px solid #ccc;
+        border-left: 1px solid #ccc;
+    }
 
-/* blockquote 样式 */
-blockquote {
-  display: block;
-  border-left: 8px solid #d0e5f2;
-  padding: 5px 10px;
-  margin: 10px 0;
-  line-height: 1.4;
-  font-size: 100%;
-  background-color: #f1f1f1;
-}
+    table td,
+    table th {
+        border-bottom: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        padding: 3px 5px;
+    }
 
-/* code 样式 */
-code {
-  display: inline-block;
-  *display: inline;
-  *zoom: 1;
-  background-color: #f1f1f1;
-  border-radius: 3px;
-  padding: 3px 5px;
-  margin: 0 3px;
-}
-pre code {
-  display: block;
-}
+    table th {
+        border-bottom: 2px solid #ccc;
+        text-align: center;
+    }
 
-/* ul ol 样式 */
-ul, ol {
-  margin: 10px 0 10px 20px;
-}
-    #li-news{
+    /* blockquote 样式 */
+    blockquote {
+        display: block;
+        border-left: 8px solid #d0e5f2;
+        padding: 5px 10px;
+        margin: 10px 0;
+        line-height: 1.4;
+        font-size: 100%;
+        background-color: #f1f1f1;
+    }
+
+    /* code 样式 */
+    code {
+        display: inline-block;
+        *display: inline;
+        *zoom: 1;
+        background-color: #f1f1f1;
+        border-radius: 3px;
+        padding: 3px 5px;
+        margin: 0 3px;
+    }
+
+    pre code {
+        display: block;
+    }
+
+    /* ul ol 样式 */
+    ul,
+    ol {
+        margin: 10px 0 10px 20px;
+    }
+
+    #li-news {
         margin-top: 20px;
     }
-    #news-content{
+
+    #news-content {
         font-size: larger;
         margin-left: 200px;
         margin-right: 200px
     }
-    a:link{
+
+    a:link {
         color: black;
-        text-decoration:none;
+        text-decoration: none;
     }
-    a:hover{
+
+    a:hover {
         color: #FF7E00;
-        text-decoration:underline;
+        text-decoration: underline;
     }
+
     a:visited {
-        color:#666666;
-        text-decoration:none;
+        color: #666666;
+        text-decoration: none;
     }
-    </style>
+</style>
 {% endblock %}
 
 {% block content %}
@@ -79,41 +88,41 @@ ul, ol {
         <h2>{{ news.title }}</h2>
     </el-row>
     <el-row type="flex" justify="center" style="text-align: center">
-        <p style="color: #666666"><span style="margin-right: 20px">{{ news.user.username }}</span>
+        <p style="color: #666666"><span style="margin-right: 20px">{{ news.user_id }}</span>
             <span>
                 {{ news.pub_date }}
             </span></p>
     </el-row>
-    <div  id="news-content">
+    <div id="news-content">
         <div v-html="content">
+        </div>
     </div>
-</div>
 </div>
 {% endblock %}
 {% block vue %}
 <script>
-    app.activeIndex= 'news';
+    app.activeIndex = 'news';
     new Vue({
-            el: '#news',
+        el: '#news',
 
-            data: {
-                content:'{{ news.content }}',
-                news:{}
-            },
+        data: {
+            content: '{{ news.content }}',
+            news: {}
+        },
 
-            methods: {
-                getNewsDetails: function () {
-                    this.$http.get('/news/' + {{ news.id }}).then(function (data) {
-                        this.news = data.body;
-                    }, function (response) {
-                        console.info(response);
-                    })
+        methods: {
+            getNewsDetails: function () {
+                this.$http.get('/news/' + {{ news.id }}).then(function (data) {
+                    this.news = data.body;
+                }, function (response) {
+                    console.info(response);
+                })
                 }
             },
 
-            created: function () {
-                this.getNewsDetails()
-            }
+    created: function () {
+        this.getNewsDetails()
+    }
         });
 </script>
 {% endblock %}

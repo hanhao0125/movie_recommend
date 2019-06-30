@@ -1,8 +1,8 @@
-from settings import app
-from back import b
-from features import f
-from user import u
-from movie import m
+from application.settings import app
+from application.back import b
+from application.features import f
+from application.user import u
+from application.movie import m
 from flask import render_template
 
 
