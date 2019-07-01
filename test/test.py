@@ -50,10 +50,13 @@ class TestCluster():
     def test_visualization(self):
         self.c.visualization()
 
+    def test_similar_movie_vis(self):
+        self.c.similar_movie_visualization(3793)
+
 
 if __name__ == "__main__":
     t = TestCluster()
-    t.test_visualization()
+    t.test_similar_movie_vis()
     # t = TestRecommendModels()
     # t.test_check_uid()
     # t.test_verify_rating()
