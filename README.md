@@ -12,7 +12,9 @@
     * 后面使用 pandas 的 to_sql 导入,导入完在修改 schema 吧
 * 使用 redis 做页面访问次数统计
 * 训练了 SVD 模型，使用 SVD 分解后的用户矩阵和 item 矩阵进行了Kmeans 聚类
-
+# Top similar movie
+使用 svd 分解后的电影矩阵进行计算相似电影，下图是与电影**X-Men (2000)** 相似度最高的前 10 部电影。
+![top_similar_movie](data/img/top_similar_movie.png)
 movie cluster
 ![movie_cluster](data/img/movie_cluster.png)
 
