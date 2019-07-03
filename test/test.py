@@ -2,6 +2,7 @@ import import_parent
 from application.recommend_models import models, cluster
 import unittest
 from pprint import pprint as pp
+from boxx import timeit
 
 
 class TestRecommendModels():
@@ -53,10 +54,14 @@ class TestCluster():
     def test_similar_movie_vis(self):
         self.c.similar_movie_visualization(3793)
 
+    def test_get_movie_ids_by_uid(self):
+        with timeit():
+            models.get_movie_ids_by_uid(1, mode="unseen")
+
 
 if __name__ == "__main__":
     t = TestCluster()
-    t.test_similar_movie_vis()
+    t.test_get_movie_ids_by_uid()
     # t = TestRecommendModels()
     # t.test_check_uid()
     # t.test_verify_rating()

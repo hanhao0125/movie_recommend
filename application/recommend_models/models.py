@@ -10,7 +10,7 @@ from surprise.model_selection import cross_validate
 
 from application.config import RECOMMEND_MODEL_SAVED_PATH
 from application.database import Movie, Rating
-from application.settings import db
+from application.settings import db, redis_client
 from typing import *
 # ! surprise fucked.
 # ! one should always keep the type the raw id and inner id in mind
@@ -139,14 +139,15 @@ class RecommendModel(object):
         similarity_table = sorted(similarity_table)[1:n+1]
         return similarity_table
 
-    def recommend_movies_by_similar_user(self, uid, n=10):
+    def recommend_movies_by_similar_user(self, uid: int, n=10):
         similar_users = self.get_top_similarities_users(uid)
         rm = {}
-        for sm in similar_users:
+        for su in similar_users:
             t = []
-            for mid in get_liked_movies(sm[1]):
+            for mid in get_liked_movies(su[1]):
                 t.append(get_movie_object_by_id(mid))
-            rm[sm[1]] = t
+            rm[su[1]] = t
+        rm = sum(list(rm.values()), [])
         return rm
 
     def recommend_movies_by_similar_movie(self, uid: int, thres: float = 3.5):
@@ -165,29 +166,44 @@ class RecommendModel(object):
         similar_movies = {}
         for mid in liked_movies:
             t = []
-            for s in self.get_top_similarities(mid):
-                m = get_movie_object_by_id(s[1])
-                m['sim'] = s[0]
+            key = "movie_similar:" + str(mid)
+            if redis_client.exists(key):
+                top_similar = redis_client.lrange(key, 0, -1)
+            else:
+                top_similar = self.get_top_similarities(mid)
+                # only take movie id
+                top_similar = [s[1] for s in top_similar]
+                redis_client.rpush(key, *top_similar)
+            for s in top_similar:
+                m = get_movie_object_by_id(s)
+                # m['sim'] = s[0]
                 t.append(m)
             similar_movies[mid] = t
+        # * similar movies  struct: mid:[m1,m2,m3]
+        # * currently return all similar movies
+        similar_movies = sum(list(similar_movies.values()), [])
         return similar_movies
 
-    def recommend_movies_by_predict_ratings(self, uid: int, n=10, thres=3.5):
-        # unseen_ratings = get_rating_by_uid(uid, seen=False)
+    def recommend_movies_by_predict_ratings(self, uid: int, n=30, thres=3.5):
         unseen_movie_ids = get_movie_ids_by_uid(uid)
         predict_ratings = []
         for mid in unseen_movie_ids:
             # mid must be rating
             if self._check_mid_exist(mid):
                 p = self.predict_rating(uid, mid)
-                d = get_movie_object_by_id(mid)
-                d['est'] = p.est
+                d = [mid, p.est]
                 predict_ratings.append(d)
 
         # sort by rating and get top n
-        predict_ratings.sort(key=lambda x: x["est"], reverse=True)
+        predict_ratings.sort(key=lambda x: x[0], reverse=True)
         if n > 0:
-            return predict_ratings[:n]
+            ret = []
+            predict_ratings = predict_ratings[:n]
+            for p in predict_ratings:
+                d = get_movie_object_by_id(p[0])
+                d['est'] = p[1]
+                ret.append(d)
+            return ret
         else:
             return predict_ratings
 

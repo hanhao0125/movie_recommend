@@ -251,9 +251,11 @@ def get_all_my_collections():
 @m.route('/recommend_movies')
 @login_required
 def recommend_movies():
-    user_id = current_user.id
+    user_id = int(current_user.id)
     # res = apriori.recommend_by_user_id(user_id)
-    res = svd.recommend_movies_by_predict_ratings(uid=int(user_id))
+    # res = svd.recommend_movies_by_similar_movie(uid=user_id)
+    # res = svd.recommend_movies_by_predict_ratings(uid=user_id)
+    res = svd.recommend_movies_by_similar_user(uid=user_id)
     return jsonify(res)
 
 
