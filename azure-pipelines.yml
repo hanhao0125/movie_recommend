@@ -4,13 +4,10 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
 trigger:
-- master
-# abc
+  - master
 pool:
   vmImage: 'ubuntu-latest'
-- task: DotNetCoreCLI@2 # aaa
-  inputs:
-    command: 'build'
+
 strategy:
   matrix:
     Python27:
@@ -27,13 +24,3 @@ steps:
   inputs:
     versionSpec: '$(python.version)'
   displayName: 'Use Python $(python.version)'
-
-- script: |
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
-  displayName: 'Install dependencies'
-
-- script: |
-    pip install pytest pytest-azurepipelines
-    pytest
-  displayName: 'pytest'
